@@ -337,7 +337,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ----------------------------------------------------
-    // 7. Start Preloader
+    // 7. Start Preloader and Initialize Auth UI
     // ----------------------------------------------------
+    if (window.PocketJasoosAuth) {
+        window.PocketJasoosAuth.updateUI();
+    }
     preloadImages();
 });
