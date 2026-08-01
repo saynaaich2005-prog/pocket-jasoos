@@ -140,62 +140,46 @@ document.addEventListener("DOMContentLoaded", () => {
     let storyTriggers = [];
 
     const initGSAP = () => {
-        gsap.registerPlugin(ScrollTrigger);
-
-        // Frame scrub tween
-        scrollTween = gsap.to(playhead, {
+        // Play animation automatically over 3.5 seconds
+        gsap.to(playhead, {
             frame: frameCount,
             snap: "frame",
+            duration: 3.5,
             ease: "none",
-            scrollTrigger: {
-                trigger: "#panel-intro",
-                start: "top top",
-                end: "bottom bottom",
-                scrub: 0.5,
-                onUpdate: (self) => {
-                    renderFrame(Math.round(playhead.frame));
-                    if (scrollProgressLine) {
-                        scrollProgressLine.style.width = `${self.progress * 100}%`;
-                    }
+            onUpdate: () => {
+                renderFrame(Math.round(playhead.frame));
+                if (scrollProgressLine) {
+                    const progress = playhead.frame / frameCount;
+                    scrollProgressLine.style.width = `${progress * 100}%`;
+                }
+            },
+            onComplete: () => {
+                // Show radiant intro
+                const radiant = document.getElementById('radiant-intro');
+                if (radiant) {
+                    radiant.classList.remove('hidden');
+                    // Allow CSS display to apply before opacity transition
+                    setTimeout(() => {
+                        radiant.classList.remove('opacity-0', 'pointer-events-none');
+                        
+                        // 3D Pop out animation
+                        gsap.to("#intro-logo", { scale: 1, duration: 1.2, ease: "elastic.out(1, 0.5)", delay: 0.2 });
+                        gsap.to("#intro-title", { scale: 1, duration: 1.2, ease: "elastic.out(1, 0.5)", delay: 0.4 });
+                        gsap.to("#intro-welcome", { opacity: 1, y: -20, duration: 1, ease: "power2.out", delay: 1 });
+                        
+                        // Wait, then fade out and go to dashboard
+                        setTimeout(() => {
+                            radiant.classList.add('opacity-0', 'pointer-events-none');
+                            setTimeout(() => {
+                                radiant.classList.add('hidden');
+                                if (typeof switchTab === 'function') switchTab('dashboard');
+                            }, 1000);
+                        }, 3500);
+                    }, 50);
+                } else {
+                    if (typeof switchTab === 'function') switchTab('dashboard');
                 }
             }
-        });
-
-        // Cards fade trigger
-        const sections = document.querySelectorAll(".story-section");
-        sections.forEach((section) => {
-            const wrapper = section.querySelector(".content-wrapper");
-            if (!wrapper) return;
-            
-            // Fade In ScrollTrigger
-            const inTrigger = ScrollTrigger.create({
-                trigger: section,
-                start: "top 75%",
-                end: "top 35%",
-                scrub: true,
-                onUpdate: (self) => {
-                    gsap.set(wrapper, {
-                        opacity: self.progress,
-                        y: 50 - (self.progress * 50)
-                    });
-                }
-            });
-            storyTriggers.push(inTrigger);
-
-            // Fade Out ScrollTrigger
-            const outTrigger = ScrollTrigger.create({
-                trigger: section,
-                start: "bottom 60%",
-                end: "bottom 20%",
-                scrub: true,
-                onUpdate: (self) => {
-                    gsap.set(wrapper, {
-                        opacity: 1 - self.progress,
-                        y: -self.progress * 50
-                    });
-                }
-            });
-            storyTriggers.push(outTrigger);
         });
     };
 
@@ -259,6 +243,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 setTimeout(() => {
                     panel.classList.remove("opacity-0");
                     panel.classList.add("opacity-100");
+                    
+                    if (tabId === 'analytics') {
+                        gsap.fromTo(".radar-segment", 
+                            { scale: 0, opacity: 0, transformOrigin: "50% 50%" },
+                            { scale: 1, opacity: 1, duration: 1, stagger: 0.15, ease: "elastic.out(1, 0.7)", delay: 0.2 }
+                        );
+                    }
                 }, 50);
             } else {
                 panel.classList.add("hidden", "opacity-0");
@@ -310,7 +301,43 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // ----------------------------------------------------
-    // 6. Start Preloader
+    // 6. Advanced Hover Animations
+    // ----------------------------------------------------
+    const timelineCard = document.getElementById('spending-timeline-card');
+    if (timelineCard) {
+        timelineCard.addEventListener('mouseenter', () => {
+            const bars = timelineCard.querySelectorAll('.group > div:last-child');
+            gsap.fromTo(bars, 
+                { scaleY: 0, transformOrigin: "bottom" },
+                { scaleY: 1, duration: 0.6, ease: "back.out(1.5)", stagger: 0.05 }
+            );
+        });
+    }
+
+    const radarPathsContainer = document.getElementById('radar-paths');
+    if (radarPathsContainer) {
+        const segments = radarPathsContainer.querySelectorAll('.radar-segment');
+        segments.forEach(segment => {
+            segment.addEventListener('mouseenter', () => {
+                gsap.to(segment, {
+                    scale: 1.15,
+                    transformOrigin: "center",
+                    duration: 0.4,
+                    ease: "elastic.out(1, 0.4)"
+                });
+            });
+            segment.addEventListener('mouseleave', () => {
+                gsap.to(segment, {
+                    scale: 1,
+                    duration: 0.3,
+                    ease: "power2.out"
+                });
+            });
+        });
+    }
+
+    // ----------------------------------------------------
+    // 7. Start Preloader
     // ----------------------------------------------------
     preloadImages();
 });

@@ -168,12 +168,7 @@
                     <span>Categories</span>
                 </a>
             </div>
-            <!-- Quick Add Action Button -->
-            <div class="p-4 border-t border-white/5">
-                <button class="w-full bg-gradient-to-r from-primary-container to-secondary-container text-on-primary-container font-label-md text-label-md py-3 rounded-lg font-bold shadow-[0_0_15px_rgba(189,0,255,0.3)] hover:shadow-[0_0_25px_rgba(189,0,255,0.5)] transition-shadow">
-                    Quick Add
-                </button>
-            </div>
+
         </nav>
 
         <!-- Main Content Area Wrapper -->
@@ -183,26 +178,28 @@
             <header class="sticky top-0 w-full z-30 flex justify-between items-center px-gutter py-4 bg-background/80 backdrop-blur-md border-b border-white/5 text-primary">
                 <!-- Mobile Logo Title -->
                 <div class="flex md:hidden items-center gap-3">
-                    <div class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary">Pocket Jasoos</div>
+                    <img src="logo.jpg" alt="Pocket Jasoos Logo" class="w-8 h-8 rounded-full border border-primary/50 shadow-[0_0_10px_rgba(189,0,255,0.5)]">
+                    <h1 class="font-headline-md text-headline-md-mobile text-on-surface tracking-wide">POCKET<span class="text-primary font-bold">JASOOS</span></h1>
                 </div>
+
                 <!-- Desktop Page Header Title -->
-                <div class="hidden md:block font-headline-md text-headline-md font-bold text-on-surface" id="dynamic-page-title">
-                    Case Investigation: Mission Intro
+                <div class="hidden md:flex items-center gap-4">
+                    <img src="logo.jpg" alt="Pocket Jasoos Logo" class="w-10 h-10 rounded-full border border-primary/50 shadow-[0_0_10px_rgba(189,0,255,0.5)]">
+                    <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-wide" id="dynamic-page-title">Pocket Jasoos</h1>
                 </div>
+
                 <!-- Header Actions on Right -->
-                <div class="flex items-center gap-4">
-                    <div class="relative hidden sm:block focus-within:ring-2 focus-within:ring-secondary rounded-full">
+                <div class="flex items-center gap-2 md:gap-4">
+                    <span class="hidden sm:inline font-label-lg text-primary-fixed drop-shadow-[0_0_8px_rgba(236,178,255,0.5)] mr-2">Welcome User</span>
+                    <div class="hidden md:flex relative mr-2">
                         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
                         <input class="bg-surface-variant/30 border border-white/10 rounded-full py-2 pl-10 pr-4 text-body-md text-on-surface focus:outline-none placeholder:text-on-surface-variant/50" placeholder="Search clues..." type="text"/>
                     </div>
-                    <button class="text-on-surface-variant hover:bg-surface-variant/20 rounded-full p-2 transition-colors">
-                        <span class="material-symbols-outlined">calendar_month</span>
-                    </button>
                     <button class="text-on-surface-variant hover:bg-surface-variant/20 rounded-full p-2 transition-colors relative">
                         <span class="material-symbols-outlined">notifications</span>
                         <span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border border-background"></span>
                     </button>
-                    <div class="h-10 w-10 rounded-full bg-surface-variant border border-white/10 overflow-hidden ml-2">
+                    <div class="h-10 w-10 rounded-full bg-surface-variant border border-white/10 overflow-hidden ml-2 shadow-[0_0_10px_rgba(189,0,255,0.3)]">
                         <img alt="User Profile Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCO9opqPN5qRaDK-KLHUi7i3IFVGh9bTxggXipG0PKFt8to_fRZ7RkiWA13wg9axHMBZPhhgIuIMRdDsKPqZ1qGBNIxcEqnWGVrjkPhhS41-XjoRBrC6gBwPk-aqH5QSULl918rgKUe0IK9XzEWPQjG6h0V5ld6hjjq3152vpHB4tqEDXdvj4PGOVL-GhG3dQTWWj80WS3bvyEZn3ozs-Us09px-nHygC2RIgxgxZM-s2FrRQQsVG6K7g"/>
                     </div>
                 </div>
@@ -214,66 +211,20 @@
             <div class="tab-panel opacity-100" id="panel-intro">
                 <main class="story-container">
                     <!-- Intro Cover Section -->
-                    <section class="story-section" id="section-intro">
-                        <div class="content-wrapper centered">
-                            <span class="badge">CLASSIFIED FILES</span>
-                            <h1 class="main-title">POCKET JASOOS</h1>
-                            <p class="tagline">Follow the surveillance sequence below. Scroll to trace active financial patterns.</p>
-                            <div class="scroll-indicator">
-                                <div class="mouse">
-                                    <div class="wheel"></div>
-                                </div>
-                                <span>Scroll to Trace</span>
-                            </div>
-                        </div>
+                    <section class="story-section min-h-screen flex flex-col items-center justify-center p-gutter" id="section-intro">
+                        <!-- Empty section for cinematic canvas playback -->
                     </section>
-
-                    <!-- Story Step 1 -->
-                    <section class="story-section" id="section-trace">
-                        <div class="content-wrapper left-aligned">
-                            <div class="glass-card inner-glow p-8 rounded-xl shadow-[0_20px_40px_rgba(0,0,0,0.5)] border-white/5">
-                                <div class="flex justify-between items-center mb-6">
-                                    <span class="font-mono text-xs text-primary tracking-widest uppercase">INTEL // TIMELINE</span>
-                                    <h3 class="font-headline-sm text-on-surface">The Disappearance</h3>
-                                </div>
-                                <p class="text-on-surface-variant font-light leading-relaxed mb-6">A strange pattern is spotted in the records. Small, silent sums of currency vanishing at odd hours. We map the physical traces. Keep scrubbing to track the active agent.</p>
-                                <div class="flex items-center gap-3 font-mono text-[10px] text-on-surface-variant border-t border-white/5 pt-5">
-                                    <div class="status-dot pulsing"></div>
-                                    <span>TRACING TRANSACTIONS...</span>
-                                </div>
-                            </div>
+                    
+                    <!-- Radiant 3D Reveal Overlay -->
+                    <div id="radiant-intro" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#1a0b2e] opacity-0 pointer-events-none transition-opacity duration-1000 hidden">
+                        <!-- Radiant background glow -->
+                        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary-container/40 via-background to-background"></div>
+                        <div class="relative z-10 flex flex-col items-center">
+                            <img src="logo.jpg" alt="Pocket Jasoos Logo" class="w-40 h-40 rounded-full border-4 border-primary shadow-[0_0_50px_rgba(189,0,255,0.8)] mb-8 transform scale-0" id="intro-logo">
+                            <h1 class="text-6xl md:text-8xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-white to-primary drop-shadow-[0_10px_0_rgba(189,0,255,1)] transform scale-0 translate-x-8" id="intro-title" style="text-shadow: 0px 5px 0px #bd00ff, 0px 10px 0px #320047, 0px 15px 20px rgba(0,0,0,0.8);">POCKET JASOOS</h1>
+                            <p class="text-5xl md:text-7xl font-bold text-primary-fixed mt-12 drop-shadow-[0_0_20px_rgba(236,178,255,1)] opacity-0 tracking-wide" id="intro-welcome" style="font-family: 'Brush Script MT', cursive, serif;">Welcome User</p>
                         </div>
-                    </section>
-
-                    <!-- Story Step 2 -->
-                    <section class="story-section" id="section-evidence">
-                        <div class="content-wrapper right-aligned">
-                            <div class="glass-card inner-glow p-8 rounded-xl shadow-[0_20px_40px_rgba(0,0,0,0.5)] border-white/5">
-                                <div class="flex justify-between items-center mb-6">
-                                    <span class="font-mono text-xs text-primary tracking-widest uppercase">INTEL // METRIC</span>
-                                    <h3 class="font-headline-sm text-on-surface">Locating Suspects</h3>
-                                </div>
-                                <p class="text-on-surface-variant font-light leading-relaxed mb-6">Every spending anomaly leaves footprints. By compiling spatial and chronological evidence, we group the suspicious transactions. The target is closing in.</p>
-                                <div class="flex items-center gap-3 font-mono text-[10px] text-on-surface-variant border-t border-white/5 pt-5">
-                                    <div class="status-dot pulsing warning"></div>
-                                    <span>COMPILING CATEGORY PROFILE...</span>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- Story Step 3 -->
-                    <section class="story-section" id="section-resolution">
-                        <div class="content-wrapper centered">
-                            <div class="glass-card inner-glow p-8 rounded-xl max-w-[700px] mx-auto shadow-[0_20px_40px_rgba(0,0,0,0.5)] border-white/5 text-center">
-                                <h2 class="text-3xl font-headline-md text-gradient mb-4">SUSPECT IDENTIFIED</h2>
-                                <p class="text-on-surface-variant leading-relaxed mb-6">Chronological logs complete. The financial targets have been plotted. Select the <strong>Dashboard</strong> in the navigation panel to review the active case file records.</p>
-                                <div class="flex justify-center gap-4">
-                                    <button class="btn btn-primary" onclick="switchTab('dashboard')">Open Case Files</button>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
+                    </div>
                 </main>
 
                 <!-- UI Hud elements (Intro Only) -->
@@ -304,7 +255,7 @@
                     <!-- Top Stats Bento -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <!-- Balance Card -->
-                        <div class="glass-card glass-inner-glow p-6 flex flex-col justify-between group rounded-xl">
+                        <div class="glass-card glass-inner-glow p-6 flex flex-col justify-between group rounded-xl hover:bg-error/10 hover:border-error/50 hover:scale-[1.02] transition-all duration-300 cursor-pointer border border-transparent">
                             <div class="flex justify-between items-start mb-4">
                                 <div class="h-10 w-10 rounded-full bg-error/10 flex items-center justify-center">
                                     <span class="material-symbols-outlined text-error">account_balance_wallet</span>
@@ -324,7 +275,7 @@
                         </div>
                         
                         <!-- Total Expenses Card -->
-                        <div class="glass-card glass-inner-glow p-6 flex flex-col justify-between group rounded-xl">
+                        <div class="glass-card glass-inner-glow p-6 flex flex-col justify-between group rounded-xl hover:bg-secondary-container/20 hover:border-secondary/50 hover:scale-[1.02] transition-all duration-300 cursor-pointer border border-transparent">
                             <div class="flex justify-between items-start mb-4">
                                 <div class="h-10 w-10 rounded-full bg-surface-variant/50 flex items-center justify-center border border-white/5">
                                     <span class="material-symbols-outlined text-secondary font-bold">receipt_long</span>
@@ -345,7 +296,7 @@
                         </div>
                         
                         <!-- Savings Goal Card -->
-                        <div class="glass-card glass-inner-glow p-6 flex flex-col justify-between group bg-gradient-to-br from-surface-container/60 to-primary-container/10 rounded-xl">
+                        <div class="glass-card glass-inner-glow p-6 flex flex-col justify-between group bg-gradient-to-br from-surface-container/60 to-primary-container/10 rounded-xl hover:bg-primary-container/20 hover:border-primary/50 hover:scale-[1.02] transition-all duration-300 cursor-pointer border border-transparent">
                             <div class="flex justify-between items-start mb-4">
                                 <div class="h-10 w-10 rounded-full bg-primary-container/20 flex items-center justify-center border border-primary/20">
                                     <span class="material-symbols-outlined text-primary font-bold">savings</span>
@@ -367,7 +318,7 @@
                     <!-- Main View: Charts Bento -->
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <!-- Spending Timeline (Left - spans 2 cols) -->
-                        <div class="glass-card glass-inner-glow p-6 lg:col-span-2 flex flex-col min-h-[320px] rounded-xl">
+                        <div class="glass-card glass-inner-glow p-6 lg:col-span-2 flex flex-col min-h-[320px] rounded-xl hover:bg-surface-variant/20 hover:border-white/20 transition-all duration-300 cursor-pointer group/timeline" id="spending-timeline-card">
                             <div class="flex justify-between items-center mb-6">
                                 <h3 class="font-headline-sm text-headline-sm text-on-surface">Spending Timeline</h3>
                                 <div class="flex gap-2">
@@ -383,21 +334,33 @@
                                     <div class="w-full h-[1px] bg-white/5"></div>
                                     <div class="w-full h-[1px] bg-white/5"></div>
                                 </div>
-                                <!-- Bars -->
-                                <div class="w-1/12 bg-surface-variant/50 hover:bg-secondary/50 transition-colors h-[30%] rounded-t-md relative group z-10 mx-1"></div>
-                                <div class="w-1/12 bg-surface-variant/50 hover:bg-secondary/50 transition-colors h-[50%] rounded-t-md relative group z-10 mx-1"></div>
-                                <div class="w-1/12 bg-surface-variant/50 hover:bg-secondary/50 transition-colors h-[20%] rounded-t-md relative group z-10 mx-1"></div>
-                                <div class="w-1/12 bg-error/60 hover:bg-error transition-colors h-[90%] rounded-t-md relative group z-10 mx-1 shadow-[0_0_15px_rgba(255,180,171,0.2)]">
-                                    <div class="absolute -top-10 left-1/2 -translate-x-1/2 bg-surface-container-high text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity border border-white/10 text-nowrap">Spike!</div>
+                                <!-- Segmented Bars -->
+                                <div class="w-1/12 flex flex-col gap-0.5 group z-10 mx-1">
+                                    <div class="h-2 rounded-t-sm bg-primary/20"></div><div class="h-20 rounded-b-sm bg-primary/80"></div>
                                 </div>
-                                <div class="w-1/12 bg-surface-variant/50 hover:bg-secondary/50 transition-colors h-[40%] rounded-t-md relative group z-10 mx-1"></div>
-                                <div class="w-1/12 bg-surface-variant/50 hover:bg-secondary/50 transition-colors h-[60%] rounded-t-md relative group z-10 mx-1"></div>
-                                <div class="w-1/12 bg-surface-variant/50 hover:bg-secondary/50 transition-colors h-[35%] rounded-t-md relative group z-10 mx-1"></div>
+                                <div class="w-1/12 flex flex-col gap-0.5 group z-10 mx-1">
+                                    <div class="h-6 rounded-t-sm bg-secondary/20"></div><div class="h-16 rounded-b-sm bg-secondary/80"></div>
+                                </div>
+                                <div class="w-1/12 flex flex-col gap-0.5 group z-10 mx-1">
+                                    <div class="h-2 rounded-t-sm bg-tertiary/20"></div><div class="h-12 rounded-b-sm bg-tertiary/80"></div>
+                                </div>
+                                <div class="w-1/12 flex flex-col gap-0.5 group z-10 mx-1">
+                                    <div class="h-10 rounded-t-sm bg-error/20"></div><div class="h-32 rounded-b-sm bg-error/80"></div>
+                                </div>
+                                <div class="w-1/12 flex flex-col gap-0.5 group z-10 mx-1">
+                                    <div class="h-4 rounded-t-sm bg-primary/20"></div><div class="h-24 rounded-b-sm bg-primary/80"></div>
+                                </div>
+                                <div class="w-1/12 flex flex-col gap-0.5 group z-10 mx-1">
+                                    <div class="h-8 rounded-t-sm bg-secondary/20"></div><div class="h-20 rounded-b-sm bg-secondary/80"></div>
+                                </div>
+                                <div class="w-1/12 flex flex-col gap-0.5 group z-10 mx-1">
+                                    <div class="h-4 rounded-t-sm bg-tertiary/20"></div><div class="h-16 rounded-b-sm bg-tertiary/80"></div>
+                                </div>
                             </div>
                         </div>
                         
                         <!-- Suspect Category Breakdown -->
-                        <div class="glass-card glass-inner-glow p-6 flex flex-col rounded-xl">
+                        <div class="glass-card glass-inner-glow p-6 flex flex-col rounded-xl hover:bg-surface-variant/20 hover:border-white/20 transition-all duration-300 cursor-pointer hover:scale-[1.02]">
                             <h3 class="font-headline-sm text-headline-sm text-on-surface mb-6">The Suspects</h3>
                             <div class="flex-1 flex flex-col justify-center gap-4">
                                 <div class="flex items-center justify-between">
@@ -435,7 +398,7 @@
                     <!-- Bottom Row: Reports & Insights -->
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <!-- Recent Investigative Reports (Transactions) -->
-                        <div class="glass-card glass-inner-glow p-0 lg:col-span-2 flex flex-col overflow-hidden rounded-xl">
+                        <div class="glass-card glass-inner-glow p-0 lg:col-span-2 flex flex-col overflow-hidden rounded-xl hover:bg-surface-variant/10 hover:border-white/20 transition-all duration-300 cursor-pointer">
                             <div class="p-6 border-b border-white/5 flex justify-between items-center">
                                 <h3 class="font-headline-sm text-headline-sm text-on-surface">Recent Reports</h3>
                                 <a class="text-secondary text-sm font-medium hover:underline cursor-pointer" onclick="switchTab('expenses')">View All</a>
@@ -489,13 +452,14 @@
                         </div>
                         
                         <!-- Visual Illustration Card -->
-                        <div class="glass-card glass-inner-glow p-1 flex flex-col justify-center items-center relative overflow-hidden group bg-gradient-to-t from-background to-surface-container/40 rounded-xl min-h-[250px]">
+                        <div class="glass-card glass-inner-glow p-1 flex flex-col justify-center items-center relative overflow-hidden group bg-gradient-to-t from-background to-surface-container/40 rounded-xl min-h-[250px] hover:border-primary/50 transition-all duration-500 hover:scale-[1.02] cursor-pointer">
                             <div class="absolute inset-0 bg-primary/5 opacity-50 pointer-events-none mix-blend-overlay"></div>
                             <div class="relative w-full h-full rounded-lg overflow-hidden border border-white/5">
-                                <img alt="Confused character wondering where money goes" class="w-full h-full object-cover object-center opacity-80 group-hover:opacity-100 transition-opacity duration-500 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuANP0ea3wMY6nVM6hhk3rkCL_OqoINIvIPNdcOfXuMU8Nqw9jaUoXUusHDfEDsQEzb6J8bu1JU20jhlRvePdzR0D0WEtjaRJLUzSx1CZAvqxTOJ9h_uFqd22nshxBO4xURFUaEI0SgFbABSOOP68QTdqJyFI88Db90Tlixc5rdef__14crNGlSAETPxAW7LX_JxvpMWL8GdQvvvoPCICpcIdflmGmfpqDiOIbID9V_3PpN3yUFQ-oKUmKGpelD7VzVMCFk"/>
-                                <div class="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-background via-background/80 to-transparent">
-                                    <p class="font-headline-sm text-headline-sm text-primary drop-shadow-md mb-1">The Prime Suspect</p>
-                                    <p class="font-body-sm text-on-surface-variant text-sm italic">"Where does all my money go?"</p>
+                                <img alt="Cyberpunk Neon Detective Scanning Charts" class="w-full h-full object-cover object-center opacity-90 group-hover:opacity-100 transition-opacity duration-500 group-hover:scale-110" src="detective.jpg"/>
+                                <div class="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-transparent"></div>
+                                <div class="absolute bottom-0 left-0 w-full p-4">
+                                    <p class="font-headline-sm text-headline-sm text-primary drop-shadow-[0_0_10px_rgba(236,178,255,0.8)] mb-1">AI Financial Forensics</p>
+                                    <p class="font-body-sm text-on-surface-variant text-sm italic">Scanning anomalies...</p>
                                 </div>
                             </div>
                         </div>
@@ -513,8 +477,8 @@
                         <!-- Top Summary Bento -->
                         <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <!-- Main Spend Card -->
-                            <div class="md:col-span-2 glass-card rounded-xl p-6 relative overflow-hidden group">
-                                <div class="absolute -top-24 -right-24 w-64 h-64 bg-error/20 rounded-full blur-3xl group-hover:bg-error/30 transition-all duration-700"></div>
+                            <div class="md:col-span-2 glass-card rounded-xl p-6 relative overflow-hidden group hover:bg-error/20 hover:border-error/50 hover:scale-[1.02] transition-all duration-300 cursor-pointer border border-transparent">
+                                <div class="absolute -top-24 -right-24 w-64 h-64 bg-error/20 rounded-full blur-3xl group-hover:bg-error/40 transition-all duration-700"></div>
                                 <div class="relative z-10">
                                     <div class="flex justify-between items-start mb-4">
                                         <div>
@@ -561,8 +525,13 @@
                                 <button class="whitespace-nowrap px-4 py-2 rounded-full bg-surface-container-high border border-white/10 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant font-label-md text-label-md transition-colors">Movies</button>
                             </div>
                             <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
-                                <button class="p-2 rounded-xl bg-surface-container-high border border-white/10 text-on-surface-variant hover:text-on-surface">
-                                    <span class="material-symbols-outlined">filter_list</span>
+                                <button class="flex flex-col items-center justify-center p-2 rounded-xl bg-surface-container-high border border-white/10 text-on-surface-variant hover:text-on-surface transition-colors min-w-[60px]">
+                                    <span class="material-symbols-outlined mb-1">document_scanner</span>
+                                    <span class="text-[10px] uppercase font-bold tracking-wider">Scan</span>
+                                </button>
+                                <button class="flex flex-col items-center justify-center p-2 rounded-xl bg-surface-container-high border border-white/10 text-on-surface-variant hover:text-on-surface min-w-[60px]">
+                                    <span class="material-symbols-outlined mb-1">filter_list</span>
+                                    <span class="text-[10px] uppercase font-bold tracking-wider">Filter</span>
                                 </button>
                             </div>
                         </section>
@@ -779,8 +748,12 @@
                                     <div class="absolute w-full h-[1px] bg-white/10 rotate-45"></div>
                                     <div class="absolute w-full h-[1px] bg-white/10 rotate-90"></div>
                                     <div class="absolute w-full h-[1px] bg-white/10 rotate-[135deg]"></div>
-                                    <svg class="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
-                                        <polygon fill="rgba(189, 0, 255, 0.3)" points="50,15 80,40 70,85 30,75 15,35" stroke="#ecb2ff" stroke-width="2"></polygon>
+                                    <svg class="absolute inset-0 w-full h-full" viewBox="0 0 100 100" id="radar-paths">
+                                        <!-- Interactive Colored Segments -->
+                                        <path class="radar-segment transition-all duration-300 hover:fill-primary/60 hover:stroke-primary hover:drop-shadow-[0_0_10px_rgba(189,0,255,0.8)] cursor-pointer" fill="rgba(189, 0, 255, 0.3)" stroke="#ecb2ff" stroke-width="2" d="M 50,50 L 50,15 L 80,40 Z"></path>
+                                        <path class="radar-segment transition-all duration-300 hover:fill-secondary/60 hover:stroke-secondary hover:drop-shadow-[0_0_10px_rgba(0,238,252,0.8)] cursor-pointer" fill="rgba(0, 238, 252, 0.2)" stroke="#90fcfd" stroke-width="2" d="M 50,50 L 80,40 L 70,85 Z"></path>
+                                        <path class="radar-segment transition-all duration-300 hover:fill-error/60 hover:stroke-error hover:drop-shadow-[0_0_10px_rgba(255,180,171,0.8)] cursor-pointer" fill="rgba(255, 180, 171, 0.2)" stroke="#ffb4ab" stroke-width="2" d="M 50,50 L 70,85 L 30,75 Z"></path>
+                                        <path class="radar-segment transition-all duration-300 hover:fill-tertiary/60 hover:stroke-tertiary hover:drop-shadow-[0_0_10px_rgba(255,200,100,0.8)] cursor-pointer" fill="rgba(255, 200, 100, 0.2)" stroke="#ffe1a6" stroke-width="2" d="M 50,50 L 30,75 L 15,35 L 50,15 Z"></path>
                                     </svg>
                                     <span class="absolute -top-4 font-label-sm text-label-sm text-on-surface-variant">Food</span>
                                     <span class="absolute -right-6 font-label-sm text-label-sm text-on-surface-variant">Shop</span>
@@ -815,7 +788,7 @@
                     
                     <!-- Summary Bento Row -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="glass-card inner-glow rounded-xl p-6 flex flex-col justify-between min-h-[120px]">
+                        <div class="glass-card inner-glow rounded-xl p-6 flex flex-col justify-between min-h-[120px] hover:bg-surface-variant/20 hover:border-white/20 hover:scale-[1.02] transition-all duration-300 cursor-pointer">
                             <div class="flex justify-between items-start">
                                 <span class="text-on-surface-variant font-label-sm uppercase tracking-wider">Total Monthly Budget</span>
                                 <span class="material-symbols-outlined text-outline">account_balance_wallet</span>
@@ -824,7 +797,7 @@
                                 <span class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">₹45,000</span>
                             </div>
                         </div>
-                        <div class="glass-card inner-glow rounded-xl p-6 flex flex-col justify-between min-h-[120px]">
+                        <div class="glass-card inner-glow rounded-xl p-6 flex flex-col justify-between min-h-[120px] hover:bg-surface-variant/20 hover:border-white/20 hover:scale-[1.02] transition-all duration-300 cursor-pointer">
                             <div class="flex justify-between items-start">
                                 <span class="text-on-surface-variant font-label-sm uppercase tracking-wider">Allocated So Far</span>
                                 <span class="material-symbols-outlined text-secondary">pie_chart</span>
@@ -834,7 +807,7 @@
                                 <p class="text-secondary text-xs mt-1">₹12,500 unallocated</p>
                             </div>
                         </div>
-                        <div class="glass-card inner-glow rounded-xl p-6 flex flex-col justify-between min-h-[120px] relative overflow-hidden group">
+                        <div class="glass-card inner-glow rounded-xl p-6 flex flex-col justify-between min-h-[120px] relative overflow-hidden group hover:bg-surface-variant/20 hover:border-error/30 hover:scale-[1.02] transition-all duration-300 cursor-pointer">
                             <div class="absolute inset-0 bg-gradient-to-br from-error-container/20 to-transparent z-0"></div>
                             <div class="relative z-10 flex justify-between items-start">
                                 <span class="text-error font-label-sm uppercase tracking-wider">Over Budget Alerts</span>
@@ -902,7 +875,7 @@
                         </div>
                         
                         <!-- Category: Shopping (OVER BUDGET) -->
-                        <div class="glass-card inner-glow rounded-xl p-6 flex flex-col gap-4 group hover:border-error/50 transition-colors border-error/30 relative">
+                        <div class="glass-card inner-glow rounded-xl p-6 flex flex-col gap-4 group hover:border-error/70 hover:bg-error-container/10 transition-all duration-300 cursor-pointer hover:scale-[1.02] border-error/30 relative">
                             <div class="absolute top-0 right-0 w-16 h-16 bg-error/10 rounded-bl-full rounded-tr-xl flex items-start justify-end p-2 pointer-events-none">
                                 <span class="material-symbols-outlined text-error text-sm">warning</span>
                             </div>
@@ -983,7 +956,7 @@
                         </div>
                         
                         <!-- Add Custom Category Card -->
-                        <div class="glass-card inner-glow rounded-xl p-6 flex flex-col gap-4 group hover:border-outline/40 transition-colors border-dashed border-2 bg-transparent">
+                        <div class="glass-card border-dashed border-2 border-outline/30 rounded-xl p-6 flex flex-col items-center justify-center gap-4 text-outline hover:text-primary hover:border-primary/50 hover:bg-primary-container/10 transition-all duration-300 cursor-pointer min-h-[160px] group hover:scale-[1.02]">
                             <div class="flex-1 flex flex-col items-center justify-center gap-3 py-4 text-center cursor-pointer">
                                 <div class="w-14 h-14 rounded-full bg-surface-variant/30 flex items-center justify-center text-outline group-hover:text-primary transition-colors group-hover:bg-primary-container/10">
                                     <span class="material-symbols-outlined text-3xl">add</span>
