@@ -19,6 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
     let activeTab = "intro";
     let isPreloadDone = false;
+    let navShown = false;
 
     const pad = (num, size) => {
         let s = num + "";
@@ -274,6 +275,17 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             if (canvasContainer) canvasContainer.style.display = "none";
             if (hud) hud.style.display = "none";
+
+            // Reveal sidebar & mobile nav smoothly the first time we leave intro
+            if (!navShown) {
+                navShown = true;
+                setTimeout(() => {
+                    const sidebarNav = document.getElementById('sidebar-nav');
+                    const mobileNav  = document.getElementById('mobile-nav');
+                    if (sidebarNav) sidebarNav.classList.add('nav-visible');
+                    if (mobileNav)  mobileNav.classList.add('nav-visible');
+                }, 350);
+            }
             
             // Disable ScrollTriggers so body height returns to normal panel bounds
             if (scrollTween && scrollTween.scrollTrigger) scrollTween.scrollTrigger.disable();
@@ -301,43 +313,63 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // ----------------------------------------------------
-    // 6. Advanced Hover Animations
+    // 7. Chart Bar Tooltips
     // ----------------------------------------------------
-    const timelineCard = document.getElementById('spending-timeline-card');
-    if (timelineCard) {
-        timelineCard.addEventListener('mouseenter', () => {
-            const bars = timelineCard.querySelectorAll('.group > div:last-child');
-            gsap.fromTo(bars, 
-                { scaleY: 0, transformOrigin: "bottom" },
-                { scaleY: 1, duration: 0.6, ease: "back.out(1.5)", stagger: 0.05 }
-            );
-        });
-    }
+    const initChartTooltips = () => {
+        const tooltip    = document.getElementById('chart-tooltip');
+        if (!tooltip) return;
 
-    const radarPathsContainer = document.getElementById('radar-paths');
-    if (radarPathsContainer) {
-        const segments = radarPathsContainer.querySelectorAll('.radar-segment');
-        segments.forEach(segment => {
-            segment.addEventListener('mouseenter', () => {
-                gsap.to(segment, {
-                    scale: 1.15,
-                    transformOrigin: "center",
-                    duration: 0.4,
-                    ease: "elastic.out(1, 0.4)"
-                });
+        const ttCategory = tooltip.querySelector('.tooltip-category');
+        const ttAmount   = tooltip.querySelector('.tooltip-amount');
+        let hideTimer;
+
+        const positionTooltip = (x, y) => {
+            const tw = tooltip.offsetWidth;
+            const vw = window.innerWidth;
+            let left = x + 16;
+            let top  = y - tooltip.offsetHeight - 14;
+            if (left + tw > vw - 12) left = x - tw - 16;
+            if (top < 10) top = y + 16;
+            tooltip.style.left = left + 'px';
+            tooltip.style.top  = top  + 'px';
+        };
+
+        const showTooltip = (bar, x, y) => {
+            clearTimeout(hideTimer);
+            ttCategory.textContent = bar.dataset.category || '';
+            ttAmount.textContent   = bar.dataset.amount   || '';
+            ttCategory.style.color = getComputedStyle(bar.querySelector('.bar-fill')).backgroundColor;
+            tooltip.style.display  = 'block';
+            positionTooltip(x, y);
+        };
+
+        const hideTooltip = (delay = 0) => {
+            hideTimer = setTimeout(() => { tooltip.style.display = 'none'; }, delay);
+        };
+
+        document.querySelectorAll('.bar-group').forEach(bar => {
+            // Mouse events
+            bar.addEventListener('mouseenter', e  => showTooltip(bar, e.clientX, e.clientY));
+            bar.addEventListener('mousemove',  e  => positionTooltip(e.clientX, e.clientY));
+            bar.addEventListener('mouseleave', () => hideTooltip(80));
+
+            // Touch events (mobile)
+            bar.addEventListener('touchstart', e => {
+                e.preventDefault();
+                const t = e.touches[0];
+                showTooltip(bar, t.clientX, t.clientY);
+            }, { passive: false });
+            bar.addEventListener('touchmove', e => {
+                const t = e.touches[0];
+                positionTooltip(t.clientX, t.clientY);
             });
-            segment.addEventListener('mouseleave', () => {
-                gsap.to(segment, {
-                    scale: 1,
-                    duration: 0.3,
-                    ease: "power2.out"
-                });
-            });
+            bar.addEventListener('touchend', () => hideTooltip(2200));
         });
-    }
+    };
 
     // ----------------------------------------------------
-    // 7. Start Preloader
+    // 8. Start Preloader
     // ----------------------------------------------------
     preloadImages();
+    initChartTooltips();
 });
