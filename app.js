@@ -338,6 +338,46 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     };
 
+    const initProfileMenu = () => {
+        const menuBtn = document.getElementById("profile-menu-btn");
+        const dropdown = document.getElementById("profile-menu-dropdown");
+        const logoutBtn = document.getElementById("logout-btn");
+        if (!menuBtn || !dropdown || !logoutBtn) return;
+
+        const closeMenu = () => {
+            dropdown.classList.add("hidden");
+            menuBtn.setAttribute("aria-expanded", "false");
+        };
+
+        menuBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const isOpen = !dropdown.classList.contains("hidden");
+            if (isOpen) {
+                closeMenu();
+            } else {
+                dropdown.classList.remove("hidden");
+                menuBtn.setAttribute("aria-expanded", "true");
+            }
+        });
+
+        logoutBtn.addEventListener("click", () => {
+            closeMenu();
+            if (window.PocketJasoosAuth) {
+                window.PocketJasoosAuth.logout();
+            }
+        });
+
+        document.addEventListener("click", (e) => {
+            if (!document.getElementById("profile-menu-root")?.contains(e.target)) {
+                closeMenu();
+            }
+        });
+
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") closeMenu();
+        });
+    };
+
     // ----------------------------------------------------
     // 7. Chart Bar Tooltips
     // ----------------------------------------------------
@@ -399,6 +439,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (window.PocketJasoosAuth) {
         window.PocketJasoosAuth.updateUI();
     }
+    initProfileMenu();
     preloadImages();
     initChartTooltips();
 });
