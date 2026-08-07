@@ -51,8 +51,17 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                 };
                 img.onerror = () => {
-                    // Fallback to animation/ directory if needed
-                    img.src = `animation/ezgif-frame-${pad(i, 3)}.jpg`;
+                    // Try animation/ subfolder as fallback
+                    const fallbackSrc = `animation/ezgif-frame-${pad(i, 3)}.jpg`;
+                    if (img.src.indexOf('animation/') === -1) {
+                        img.src = fallbackSrc;
+                    } else {
+                        // Both paths failed, count it anyway so loader doesn't hang
+                        loadedCount++;
+                        if (loadedCount === frameCount) {
+                            onPreloadComplete(resolve);
+                        }
+                    }
                 };
                 img.src = getImagePath(i);
                 images.push(img);
@@ -69,7 +78,13 @@ document.addEventListener("DOMContentLoaded", () => {
             loader.style.opacity = 0;
             loader.style.visibility = "hidden";
             
-            // Initialize animations and navigation
+            // Check authentication immediately after preloader finishes
+            if (window.PocketJasoosAuth && !window.PocketJasoosAuth.getCurrentUser()) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Initialize animations and navigation for authenticated users
             initGSAP();
             initNavigation();
             resolve();
@@ -173,7 +188,9 @@ document.addEventListener("DOMContentLoaded", () => {
                             radiant.classList.add('opacity-0', 'pointer-events-none');
                             setTimeout(() => {
                                 radiant.classList.add('hidden');
-                                if (typeof switchTab === 'function') switchTab('dashboard');
+                                if (typeof switchTab === 'function') {
+                                    switchTab('dashboard');
+                                }
                             }, 1000);
                         }, 3500);
                     }, 50);
@@ -189,6 +206,15 @@ document.addEventListener("DOMContentLoaded", () => {
     // ----------------------------------------------------
     window.switchTab = (tabId) => {
         if (tabId === activeTab) return;
+        
+        // Enforce auth before switching to any functional tab
+        if (tabId !== 'intro' && window.PocketJasoosAuth) {
+            if (!window.PocketJasoosAuth.getCurrentUser()) {
+                window.location.href = 'login.html';
+                return;
+            }
+        }
+        
         activeTab = tabId;
 
         // 1. Scroll user to the top immediately
@@ -368,8 +394,11 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // ----------------------------------------------------
-    // 8. Start Preloader
+    // 8. Start Preloader and Initialize Auth UI
     // ----------------------------------------------------
+    if (window.PocketJasoosAuth) {
+        window.PocketJasoosAuth.updateUI();
+    }
     preloadImages();
     initChartTooltips();
 });
