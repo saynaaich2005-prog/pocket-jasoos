@@ -96,6 +96,13 @@
     </script>
     <link rel="preload" as="image" href="logo.jpg">
     <link rel="stylesheet" href="style.css">
+    <!-- Auth gate: redirect before the app shell renders -->
+    <script src="auth.js"></script>
+    <script>
+        if (!PocketJasoosAuth.getCurrentUser()) {
+            window.location.replace('login.html');
+        }
+    </script>
 </head>
 <body class="bg-background text-on-background font-body-md min-h-screen selection:bg-primary-container selection:text-on-primary-container antialiased pb-[80px] md:pb-0">
 
@@ -191,7 +198,7 @@
 
                 <!-- Header Actions on Right -->
                 <div class="flex items-center gap-2 md:gap-4">
-                    <span class="hidden sm:inline font-label-lg text-primary-fixed drop-shadow-[0_0_8px_rgba(236,178,255,0.5)] mr-2">Welcome User</span>
+                    <span class="hidden sm:inline font-label-lg text-primary-fixed drop-shadow-[0_0_8px_rgba(236,178,255,0.5)] mr-2 user-welcome-text">Welcome User</span>
                     <div class="hidden md:flex relative mr-2">
                         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
                         <input class="bg-surface-variant/30 border border-white/10 rounded-full py-2 pl-10 pr-4 text-body-md text-on-surface focus:outline-none placeholder:text-on-surface-variant/50" placeholder="Search clues..." type="text"/>
@@ -200,8 +207,27 @@
                         <span class="material-symbols-outlined">notifications</span>
                         <span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border border-background"></span>
                     </button>
-                    <div class="h-10 w-10 rounded-full bg-surface-variant border border-white/10 overflow-hidden ml-2 shadow-[0_0_10px_rgba(189,0,255,0.3)]">
-                        <img alt="User Profile Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCO9opqPN5qRaDK-KLHUi7i3IFVGh9bTxggXipG0PKFt8to_fRZ7RkiWA13wg9axHMBZPhhgIuIMRdDsKPqZ1qGBNIxcEqnWGVrjkPhhS41-XjoRBrC6gBwPk-aqH5QSULl918rgKUe0IK9XzEWPQjG6h0V5ld6hjjq3152vpHB4tqEDXdvj4PGOVL-GhG3dQTWWj80WS3bvyEZn3ozs-Us09px-nHygC2RIgxgxZM-s2FrRQQsVG6K7g"/>
+                    <div class="relative ml-2" id="profile-menu-root">
+                        <button
+                            id="profile-menu-btn"
+                            type="button"
+                            class="h-10 w-10 rounded-full bg-surface-variant border border-white/10 overflow-hidden shadow-[0_0_10px_rgba(189,0,255,0.3)] cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all focus:outline-none focus:ring-2 focus:ring-primary"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                            aria-label="Open profile menu"
+                        >
+                            <img alt="User Profile Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCO9opqPN5qRaDK-KLHUi7i3IFVGh9bTxggXipG0PKFt8to_fRZ7RkiWA13wg9axHMBZPhhgIuIMRdDsKPqZ1qGBNIxcEqnWGVrjkPhhS41-XjoRBrC6gBwPk-aqH5QSULl918rgKUe0IK9XzEWPQjG6h0V5ld6hjjq3152vpHB4tqEDXdvj4PGOVL-GhG3dQTWWj80WS3bvyEZn3ozs-Us09px-nHygC2RIgxgxZM-s2FrRQQsVG6K7g"/>
+                        </button>
+                        <div id="profile-menu-dropdown" class="hidden absolute right-0 top-full mt-2 w-56 glass-card inner-glow rounded-xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8)] backdrop-blur-2xl py-2 z-50">
+                            <div class="px-4 py-3 border-b border-white/5">
+                                <p class="user-display-name text-sm font-bold text-on-surface truncate">Agent Jasoos</p>
+                                <p class="user-display-email text-xs text-on-surface-variant truncate mt-0.5">agent@pocketjasoos.com</p>
+                            </div>
+                            <button type="button" id="logout-btn" class="w-full px-4 py-2.5 text-left text-sm text-error hover:bg-error-container/20 flex items-center gap-2 transition-colors">
+                                <span class="material-symbols-outlined text-base">logout</span>
+                                <span>Logout</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </header>
@@ -1014,10 +1040,16 @@
         <span class="tooltip-amount"></span>
     </div>
 
-    <!-- GSAP Libraries -->
+    <!-- GSAP Libraries (only load for authenticated sessions) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-    <script src="auth.js"></script>
-    <script src="app.js"></script>
+    <script>
+        if (PocketJasoosAuth.getCurrentUser()) {
+            PocketJasoosAuth.updateUI();
+            const appScript = document.createElement('script');
+            appScript.src = 'app.js';
+            document.body.appendChild(appScript);
+        }
+    </script>
 </body>
 </html>
