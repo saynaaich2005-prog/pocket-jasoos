@@ -1,6 +1,6 @@
 // Pocket Jasoos Unified Application Logic
 
-document.addEventListener("DOMContentLoaded", () => {
+const initApp = () => {
     // ----------------------------------------------------
     // 1. Setup Elements and Configuration
     // ----------------------------------------------------
@@ -442,4 +442,10 @@ document.addEventListener("DOMContentLoaded", () => {
     initProfileMenu();
     preloadImages();
     initChartTooltips();
-});
+};
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initApp);
+} else {
+    initApp();
+}
