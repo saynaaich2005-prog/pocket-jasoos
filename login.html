@@ -199,6 +199,7 @@
     </div>
 
     <!-- Scripts -->
+    <script src="api.js"></script>
     <script src="auth.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -279,25 +280,47 @@
                 btnText.textContent = 'DECRYPTING...';
 
                 setTimeout(async () => {
-                    const result = await PocketJasoosAuth.login(email, password);
+                    try {
+                        const response = await fetch(`${window.API.API_BASE_URL}/login`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email, password }),
+                        });
 
-                    submitBtn.disabled = false;
-                    btnIcon.classList.remove('animate-spin');
+                        const data = await response.json();
 
-                    if (result.success) {
-                        btnIcon.textContent = 'check';
-                        btnText.textContent = 'ACCESS GRANTED';
-                        successText.textContent = `Welcome back, Agent ${result.user.name}! Opening case files...`;
-                        successAlert.classList.remove('hidden');
+                        if (response.ok) {
+                            const sessionUser = {
+                                _id: data._id,
+                                name: data.name,
+                                email: data.email,
+                                badgeId: 'PJ-' + Math.floor(1000 + Math.random() * 9000),
+                                loggedInAt: new Date().toISOString(),
+                            };
+                            PocketJasoosAuth.setSession(sessionUser, data.token);
 
-                        setTimeout(() => {
-                            window.location.href = 'index.html';
-                        }, 900);
-                    } else {
+                            btnIcon.textContent = 'check';
+                            btnText.textContent = 'ACCESS GRANTED';
+                            successText.textContent = `Welcome back, Agent ${data.name}! Opening case files...`;
+                            successAlert.classList.remove('hidden');
+
+                            setTimeout(() => {
+                                window.location.href = 'index.html';
+                            }, 900);
+                        } else {
+                            btnIcon.textContent = 'login';
+                            btnText.textContent = 'DECRYPT & LOGIN';
+                            errorText.textContent = data.message || 'Invalid email or password.';
+                            errorAlert.classList.remove('hidden');
+                        }
+                    } catch (error) {
                         btnIcon.textContent = 'login';
                         btnText.textContent = 'DECRYPT & LOGIN';
-                        errorText.textContent = result.message;
+                        errorText.textContent = 'Could not reach the server. Is the backend running?';
                         errorAlert.classList.remove('hidden');
+                    } finally {
+                        submitBtn.disabled = false;
+                        btnIcon.classList.remove('animate-spin');
                     }
                 }, 400);
             });

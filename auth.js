@@ -1,36 +1,11 @@
 /**
  * Pocket Jasoos Authentication System
- * Unified Client-Side & Backend Compatible Auth Service
+ * Backend-driven auth using the Express + JWT API (see api.js for config).
  */
 
 const PocketJasoosAuth = (() => {
     const STORAGE_KEY_USER = 'pocket_jasoos_user';
-    const STORAGE_KEY_USERS_DB = 'pocket_jasoos_all_users';
-
-    // Seed initial demo agent if none exists
-    const initStorage = () => {
-        let users = [];
-        try {
-            users = JSON.parse(localStorage.getItem(STORAGE_KEY_USERS_DB)) || [];
-        } catch (e) {
-            users = [];
-        }
-
-        if (!users || users.length === 0) {
-            const defaultAgent = {
-                uid: 'agent-007',
-                name: 'Agent Jasoos',
-                email: 'agent@pocketjasoos.com',
-                password: 'detective123',
-                createdAt: new Date().toISOString(),
-                badgeId: 'PJ-7892'
-            };
-            users.push(defaultAgent);
-            localStorage.setItem(STORAGE_KEY_USERS_DB, JSON.stringify(users));
-        }
-    };
-
-    initStorage();
+    const STORAGE_KEY_TOKEN = 'pocket_jasoos_token';
 
     /**
      * Get currently logged-in user
@@ -45,6 +20,11 @@ const PocketJasoosAuth = (() => {
     };
 
     /**
+     * Get stored JWT token
+     */
+    const getToken = () => localStorage.getItem(STORAGE_KEY_TOKEN);
+
+    /**
      * Validate email format
      */
     const validateEmail = (email) => {
@@ -53,7 +33,32 @@ const PocketJasoosAuth = (() => {
     };
 
     /**
-     * Login user
+     * Persist user + token after successful login/registration
+     */
+    const setSession = (user, token) => {
+        localStorage.setItem(STORAGE_KEY_TOKEN, token);
+        localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(user));
+        updateUI();
+    };
+
+    /**
+     * Clear stored session data
+     */
+    const clearSession = () => {
+        localStorage.removeItem(STORAGE_KEY_TOKEN);
+        localStorage.removeItem(STORAGE_KEY_USER);
+        updateUI();
+    };
+
+    /**
+     * Build auth headers for protected API requests
+     */
+    const getAuthHeaders = (token = getToken()) => {
+        return token ? { Authorization: `Bearer ${token}` } : {};
+    };
+
+    /**
+     * Login user against the backend API
      */
     const login = async (email, password) => {
         const cleanEmail = email.trim().toLowerCase();
@@ -66,37 +71,36 @@ const PocketJasoosAuth = (() => {
         }
 
         try {
-            const users = JSON.parse(localStorage.getItem(STORAGE_KEY_USERS_DB)) || [];
-            const user = users.find(u => u.email.toLowerCase() === cleanEmail);
+            const res = await fetch(`${window.API.API_BASE_URL}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: cleanEmail, password }),
+            });
 
-            if (!user) {
-                return { success: false, message: 'Agent credentials not found. Please register first.' };
+            const data = await res.json();
+
+            if (!res.ok) {
+                return { success: false, message: data.message || 'Invalid email or password.' };
             }
 
-            if (user.password !== password) {
-                return { success: false, message: 'Incorrect passcode. Access denied to case files.' };
-            }
-
-            // Create active session
             const sessionUser = {
-                uid: user.uid || 'agent-' + Date.now(),
-                name: user.name || 'Agent Jasoos',
-                email: user.email,
-                badgeId: user.badgeId || 'PJ-' + Math.floor(1000 + Math.random() * 9000),
-                loggedInAt: new Date().toISOString()
+                _id: data._id,
+                name: data.name,
+                email: data.email,
+                badgeId: 'PJ-' + Math.floor(1000 + Math.random() * 9000),
+                loggedInAt: new Date().toISOString(),
             };
 
-            localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(sessionUser));
-            updateUI();
-            return { success: true, user: sessionUser };
+            setSession(sessionUser, data.token);
 
+            return { success: true, user: sessionUser };
         } catch (e) {
-            return { success: false, message: 'Authentication error occurred. Please try again.' };
+            return { success: false, message: 'Could not reach the server. Is the backend running?' };
         }
     };
 
     /**
-     * Signup / Register new user
+     * Register a new user via the backend API
      */
     const signup = async (name, email, password) => {
         const cleanName = name.trim();
@@ -113,49 +117,39 @@ const PocketJasoosAuth = (() => {
         }
 
         try {
-            const users = JSON.parse(localStorage.getItem(STORAGE_KEY_USERS_DB)) || [];
-            const existing = users.find(u => u.email.toLowerCase() === cleanEmail);
+            const res = await fetch(`${window.API.API_BASE_URL}/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: cleanName, email: cleanEmail, password }),
+            });
 
-            if (existing) {
-                return { success: false, message: 'Agent with this email is already registered. Please login.' };
+            const data = await res.json();
+
+            if (!res.ok) {
+                return { success: false, message: data.message || 'Registration failed. Please try again.' };
             }
 
-            const newUser = {
-                uid: 'agent-' + Date.now(),
-                name: cleanName,
-                email: cleanEmail,
-                password: password,
-                badgeId: 'PJ-' + Math.floor(1000 + Math.random() * 9000),
-                createdAt: new Date().toISOString()
-            };
-
-            users.push(newUser);
-            localStorage.setItem(STORAGE_KEY_USERS_DB, JSON.stringify(users));
-
-            // Auto-login newly registered user
             const sessionUser = {
-                uid: newUser.uid,
-                name: newUser.name,
-                email: newUser.email,
-                badgeId: newUser.badgeId,
-                loggedInAt: new Date().toISOString()
+                _id: data._id,
+                name: data.name,
+                email: data.email,
+                badgeId: 'PJ-' + Math.floor(1000 + Math.random() * 9000),
+                loggedInAt: new Date().toISOString(),
             };
 
-            localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(sessionUser));
-            updateUI();
-            return { success: true, user: sessionUser };
+            setSession(sessionUser, data.token);
 
+            return { success: true, user: sessionUser };
         } catch (e) {
-            return { success: false, message: 'Registration failed. Please try again.' };
+            return { success: false, message: 'Could not reach the server. Is the backend running?' };
         }
     };
 
     /**
-     * Logout currently logged-in user
+     * Logout - clear stored session and redirect to login
      */
     const logout = () => {
-        localStorage.removeItem(STORAGE_KEY_USER);
-        updateUI();
+        clearSession();
         window.location.href = 'login.html';
     };
 
@@ -235,12 +229,16 @@ const PocketJasoosAuth = (() => {
 
     return {
         getCurrentUser,
+        getToken,
+        setSession,
+        clearSession,
+        getAuthHeaders,
         validateEmail,
         login,
         signup,
         logout,
         requireAuth,
-        updateUI
+        updateUI,
     };
 })();
 

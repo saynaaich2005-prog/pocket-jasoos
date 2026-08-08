@@ -227,6 +227,7 @@
     </div>
 
     <!-- Scripts -->
+    <script src="api.js"></script>
     <script src="auth.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -322,25 +323,47 @@
                 btnText.textContent = 'REGISTERING...';
 
                 setTimeout(async () => {
-                    const result = await PocketJasoosAuth.signup(name, email, password);
+                    try {
+                        const response = await fetch(`${window.API.API_BASE_URL}/register`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ name, email, password }),
+                        });
 
-                    submitBtn.disabled = false;
-                    btnIcon.classList.remove('animate-spin');
+                        const data = await response.json();
 
-                    if (result.success) {
-                        btnIcon.textContent = 'check';
-                        btnText.textContent = 'BADGE ISSUED';
-                        successText.textContent = `Welcome Agent ${result.user.name}! Your badge is active. Redirecting...`;
-                        successAlert.classList.remove('hidden');
+                        if (response.ok) {
+                            const sessionUser = {
+                                _id: data._id,
+                                name: data.name,
+                                email: data.email,
+                                badgeId: 'PJ-' + Math.floor(1000 + Math.random() * 9000),
+                                loggedInAt: new Date().toISOString(),
+                            };
+                            PocketJasoosAuth.setSession(sessionUser, data.token);
 
-                        setTimeout(() => {
-                            window.location.href = 'index.html';
-                        }, 900);
-                    } else {
+                            btnIcon.textContent = 'check';
+                            btnText.textContent = 'BADGE ISSUED';
+                            successText.textContent = `Welcome Agent ${data.name}! Your badge is active. Redirecting...`;
+                            successAlert.classList.remove('hidden');
+
+                            setTimeout(() => {
+                                window.location.href = 'index.html';
+                            }, 900);
+                        } else {
+                            btnIcon.textContent = 'how_to_reg';
+                            btnText.textContent = 'REGISTER AGENT BADGE';
+                            errorText.textContent = data.message || 'Registration failed. Please try again.';
+                            errorAlert.classList.remove('hidden');
+                        }
+                    } catch (error) {
                         btnIcon.textContent = 'how_to_reg';
                         btnText.textContent = 'REGISTER AGENT BADGE';
-                        errorText.textContent = result.message;
+                        errorText.textContent = 'Could not reach the server. Is the backend running?';
                         errorAlert.classList.remove('hidden');
+                    } finally {
+                        submitBtn.disabled = false;
+                        btnIcon.classList.remove('animate-spin');
                     }
                 }, 400);
             });
