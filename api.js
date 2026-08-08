@@ -8,9 +8,7 @@ const isLocal = hostname === 'localhost' || hostname === '127.0.0.1';
 
 const API_BASE_URL = isLocal
   ? 'http://localhost:5000/api/auth'
-  // TODO: Replace with your deployed Render backend URL, e.g.
-  // 'https://YOUR-RENDER-APP-NAME.onrender.com/api/auth'
-  : 'https://YOUR-RENDER-APP-NAME.onrender.com/api/auth';
+  : 'https://pocket-jasoos.onrender.com/api/auth';
 
 const TOKEN_KEY = 'pocket_jasoos_token';
 const USER_KEY = 'pocket_jasoos_user';
