@@ -830,7 +830,7 @@
                                 <span class="material-symbols-outlined text-outline">account_balance_wallet</span>
                             </div>
                             <div class="mt-4">
-                                <span class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">₹45,000</span>
+                                <span id="categories-summary-total" class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">₹0</span>
                             </div>
                         </div>
                         <div class="glass-card inner-glow rounded-xl p-6 flex flex-col justify-between min-h-[120px] hover:bg-surface-variant/20 hover:border-white/20 hover:scale-[1.02] transition-all duration-300 cursor-pointer">
@@ -839,8 +839,8 @@
                                 <span class="material-symbols-outlined text-secondary">pie_chart</span>
                             </div>
                             <div class="mt-4">
-                                <span class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">₹32,500</span>
-                                <p class="text-secondary text-xs mt-1">₹12,500 unallocated</p>
+                                <span id="categories-summary-allocated" class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">₹0</span>
+                                <p id="categories-summary-unallocated" class="text-secondary text-xs mt-1">₹0 unallocated</p>
                             </div>
                         </div>
                         <div class="glass-card inner-glow rounded-xl p-6 flex flex-col justify-between min-h-[120px] relative overflow-hidden group hover:bg-surface-variant/20 hover:border-error/30 hover:scale-[1.02] transition-all duration-300 cursor-pointer">
@@ -850,148 +850,15 @@
                                 <span class="material-symbols-outlined text-error">warning</span>
                             </div>
                             <div class="relative z-10 mt-4">
-                                <span class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-error">2 Categories</span>
+                                <span id="categories-summary-overbudget" class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-error">0 Categories</span>
                                 <p class="text-on-surface-variant text-xs mt-1">Requires immediate investigation.</p>
                             </div>
                         </div>
                     </div>
                     
                     <!-- Categories Grid -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <!-- Category: Food -->
-                        <div class="glass-card inner-glow rounded-xl p-6 flex flex-col gap-4 group hover:border-primary/40 transition-colors">
-                            <div class="flex justify-between items-start">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-12 h-12 rounded-full bg-tertiary-container/20 flex items-center justify-center border border-tertiary/30">
-                                        <span class="material-symbols-outlined text-tertiary text-2xl">restaurant</span>
-                                    </div>
-                                    <div>
-                                        <h3 class="font-headline-sm text-headline-sm text-on-surface group-hover:text-tertiary transition-colors">Food</h3>
-                                        <p class="text-xs text-on-surface-variant">Daily sustenance &amp; cravings</p>
-                                    </div>
-                                </div>
-                                <button class="text-outline hover:text-on-surface transition-colors p-1"><span class="material-symbols-outlined text-[20px]">more_vert</span></button>
-                            </div>
-                            <div class="mt-2">
-                                <div class="flex justify-between text-sm mb-2">
-                                    <span class="text-on-surface">Spent: ₹12,500</span>
-                                    <span class="text-on-surface-variant">Budget: ₹15,000</span>
-                                </div>
-                                <div class="h-2 progress-bar-bg w-full">
-                                    <div class="progress-fill" style="width: 83%;"></div>
-                                </div>
-                                <p class="text-right text-xs text-on-surface-variant mt-2 font-label-sm">₹2,500 remaining</p>
-                            </div>
-                        </div>
-                        
-                        <!-- Category: Movies -->
-                        <div class="glass-card inner-glow rounded-xl p-6 flex flex-col gap-4 group hover:border-primary/40 transition-colors">
-                            <div class="flex justify-between items-start">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-12 h-12 rounded-full bg-primary-container/20 flex items-center justify-center border border-primary/30">
-                                        <span class="material-symbols-outlined text-primary text-2xl">movie</span>
-                                    </div>
-                                    <div>
-                                        <h3 class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors">Movies</h3>
-                                        <p class="text-xs text-on-surface-variant">Entertainment &amp; chill</p>
-                                    </div>
-                                </div>
-                                <button class="text-outline hover:text-on-surface transition-colors p-1"><span class="material-symbols-outlined text-[20px]">more_vert</span></button>
-                            </div>
-                            <div class="mt-2">
-                                <div class="flex justify-between text-sm mb-2">
-                                    <span class="text-on-surface">Spent: ₹2,400</span>
-                                    <span class="text-on-surface-variant">Budget: ₹3,000</span>
-                                </div>
-                                <div class="h-2 progress-bar-bg w-full">
-                                    <div class="progress-fill" style="width: 80%;"></div>
-                                </div>
-                                <p class="text-right text-xs text-on-surface-variant mt-2 font-label-sm">₹600 remaining</p>
-                            </div>
-                        </div>
-                        
-                        <!-- Category: Shopping (OVER BUDGET) -->
-                        <div class="glass-card inner-glow rounded-xl p-6 flex flex-col gap-4 group hover:border-error/70 hover:bg-error-container/10 transition-all duration-300 cursor-pointer hover:scale-[1.02] border-error/30 relative">
-                            <div class="absolute top-0 right-0 w-16 h-16 bg-error/10 rounded-bl-full rounded-tr-xl flex items-start justify-end p-2 pointer-events-none">
-                                <span class="material-symbols-outlined text-error text-sm">warning</span>
-                            </div>
-                            <div class="flex justify-between items-start">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-12 h-12 rounded-full bg-error-container/20 flex items-center justify-center border border-error/30">
-                                        <span class="material-symbols-outlined text-error text-2xl">local_mall</span>
-                                    </div>
-                                    <div>
-                                        <h3 class="font-headline-sm text-headline-sm text-on-surface group-hover:text-error transition-colors">Shopping</h3>
-                                        <p class="text-xs text-on-surface-variant">Retail therapy</p>
-                                    </div>
-                                </div>
-                                <button class="text-outline hover:text-on-surface transition-colors p-1 z-10"><span class="material-symbols-outlined text-[20px]">more_vert</span></button>
-                            </div>
-                            <div class="mt-2">
-                                <div class="flex justify-between text-sm mb-2">
-                                    <span class="text-error font-medium">Spent: ₹6,200</span>
-                                    <span class="text-on-surface-variant">Budget: ₹5,000</span>
-                                </div>
-                                <div class="h-2 progress-bar-bg w-full">
-                                    <div class="progress-fill over-budget" style="width: 100%;"></div>
-                                </div>
-                                <p class="text-right text-xs text-error mt-2 font-label-sm">Over budget by ₹1,200!</p>
-                            </div>
-                        </div>
-                        
-                        <!-- Category: Travel -->
-                        <div class="glass-card inner-glow rounded-xl p-6 flex flex-col gap-4 group hover:border-secondary/40 transition-colors">
-                            <div class="flex justify-between items-start">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-12 h-12 rounded-full bg-secondary-container/20 flex items-center justify-center border border-secondary/30">
-                                        <span class="material-symbols-outlined text-secondary text-2xl">flight_takeoff</span>
-                                    </div>
-                                    <div>
-                                        <h3 class="font-headline-sm text-headline-sm text-on-surface group-hover:text-secondary transition-colors">Travel</h3>
-                                        <p class="text-xs text-on-surface-variant">Commute &amp; escapes</p>
-                                    </div>
-                                </div>
-                                <button class="text-outline hover:text-on-surface transition-colors p-1"><span class="material-symbols-outlined text-[20px]">more_vert</span></button>
-                            </div>
-                            <div class="mt-2">
-                                <div class="flex justify-between text-sm mb-2">
-                                    <span class="text-on-surface">Spent: ₹3,100</span>
-                                    <span class="text-on-surface-variant">Budget: ₹8,000</span>
-                                </div>
-                                <div class="h-2 progress-bar-bg w-full">
-                                    <div class="progress-fill" style="width: 38%;"></div>
-                                </div>
-                                <p class="text-right text-xs text-on-surface-variant mt-2 font-label-sm">₹4,900 remaining</p>
-                            </div>
-                        </div>
-                        
-                        <!-- Category: Games -->
-                        <div class="glass-card inner-glow rounded-xl p-6 flex flex-col gap-4 group hover:border-primary-fixed/40 transition-colors">
-                            <div class="flex justify-between items-start">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-12 h-12 rounded-full bg-surface-tint/20 flex items-center justify-center border border-surface-tint/30">
-                                        <span class="material-symbols-outlined text-surface-tint text-2xl">sports_esports</span>
-                                    </div>
-                                    <div>
-                                        <h3 class="font-headline-sm text-headline-sm text-on-surface group-hover:text-surface-tint transition-colors">Games</h3>
-                                        <p class="text-xs text-on-surface-variant">Digital adventures</p>
-                                    </div>
-                                </div>
-                                <button class="text-outline hover:text-on-surface transition-colors p-1"><span class="material-symbols-outlined text-[20px]">more_vert</span></button>
-                            </div>
-                            <div class="mt-2">
-                                <div class="flex justify-between text-sm mb-2">
-                                    <span class="text-on-surface">Spent: ₹1,150</span>
-                                    <span class="text-on-surface-variant">Budget: ₹1,500</span>
-                                </div>
-                                <div class="h-2 progress-bar-bg w-full">
-                                    <div class="progress-fill" style="width: 76%;"></div>
-                                </div>
-                                <p class="text-right text-xs text-on-surface-variant mt-2 font-label-sm">₹350 remaining</p>
-                            </div>
-                        </div>
-                        
-                        <!-- Add Custom Category Card -->
+                    <div id="categories-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div id="categories-status" class="md:col-span-2 lg:col-span-3 hidden"></div>
                         <div class="glass-card border-dashed border-2 border-outline/30 rounded-xl p-6 flex flex-col items-center justify-center gap-4 text-outline hover:text-primary hover:border-primary/50 hover:bg-primary-container/10 transition-all duration-300 cursor-pointer min-h-[160px] group hover:scale-[1.02]">
                             <div class="flex-1 flex flex-col items-center justify-center gap-3 py-4 text-center cursor-pointer">
                                 <div class="w-14 h-14 rounded-full bg-surface-variant/30 flex items-center justify-center text-outline group-hover:text-primary transition-colors group-hover:bg-primary-container/10">

@@ -442,6 +442,159 @@ const initApp = () => {
     initProfileMenu();
     preloadImages();
     initChartTooltips();
+    loadCategories();
+};
+
+// ----------------------------------------------------
+// 9. Categories: Backend-driven data + rendering
+// ----------------------------------------------------
+const formatINR = (n) => {
+    const value = Number(n || 0);
+    return `₹${value.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
+};
+
+const hexToRgba = (hex, alpha) => {
+    const clean = String(hex || '').replace('#', '');
+    if (clean.length !== 6) return undefined;
+    const r = parseInt(clean.slice(0, 2), 16);
+    const g = parseInt(clean.slice(2, 4), 16);
+    const b = parseInt(clean.slice(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
+
+const escapeHTML = (str) => {
+    return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+};
+
+const categoryCardHTML = (cat) => {
+    const spent = Number(cat.spent) || 0;
+    const budget = Number(cat.budget) || 0;
+    const remaining = Number(cat.remaining) || 0;
+    const over = Boolean(cat.overBudget);
+    const color = cat.color || '#ecb2ff';
+    const icon = cat.icon || 'category';
+    const name = escapeHTML(cat.name || 'Unnamed');
+    const description = cat.description ? escapeHTML(cat.description) : '';
+    const pct = budget > 0 ? Math.min(Math.round((spent / budget) * 100), 100) : 0;
+    const fillPct = over ? 100 : pct;
+
+    const iconBg = hexToRgba(color, 0.2) || 'rgba(236,178,255,0.2)';
+    const iconBorder = hexToRgba(color, 0.3) || 'rgba(236,178,255,0.3)';
+
+    const body = `
+        <div class="flex justify-between items-start">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-full flex items-center justify-center border" style="background:${iconBg};border-color:${iconBorder};">
+                    <span class="material-symbols-outlined text-2xl" style="color:${color};">${icon}</span>
+                </div>
+                <div>
+                    <h3 class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors">${name}</h3>
+                    ${description ? `<p class="text-xs text-on-surface-variant">${description}</p>` : ''}
+                </div>
+            </div>
+            <button class="text-outline hover:text-on-surface transition-colors p-1"><span class="material-symbols-outlined text-[20px]">more_vert</span></button>
+        </div>
+        <div class="mt-2">
+            <div class="flex justify-between text-sm mb-2">
+                <span class="${over ? 'text-error font-medium' : 'text-on-surface'}">Spent: ${formatINR(spent)}</span>
+                <span class="text-on-surface-variant">Budget: ${formatINR(budget)}</span>
+            </div>
+            <div class="h-2 progress-bar-bg w-full">
+                <div class="progress-fill${over ? ' over-budget' : ''}" style="width: ${fillPct}%;"></div>
+            </div>
+            <p class="text-right text-xs ${over ? 'text-error' : 'text-on-surface-variant'} mt-2 font-label-sm">${
+                over
+                    ? `Over budget by ${formatINR(Math.abs(remaining))}!`
+                    : `${formatINR(Math.max(remaining, 0))} remaining`
+            }</p>
+        </div>`;
+
+    if (over) {
+        return `
+            <div class="glass-card inner-glow rounded-xl p-6 flex flex-col gap-4 group hover:border-error/70 hover:bg-error-container/10 transition-all duration-300 cursor-pointer hover:scale-[1.02] border-error/30 relative">
+                <div class="absolute top-0 right-0 w-16 h-16 bg-error/10 rounded-bl-full rounded-tr-xl flex items-start justify-end p-2 pointer-events-none">
+                    <span class="material-symbols-outlined text-error text-sm">warning</span>
+                </div>
+                ${body}
+            </div>`;
+    }
+
+    return `
+        <div class="glass-card inner-glow rounded-xl p-6 flex flex-col gap-4 group hover:border-primary/40 transition-colors">
+            ${body}
+        </div>`;
+};
+
+const loadCategories = async () => {
+    const grid = document.getElementById('categories-grid');
+    const statusEl = document.getElementById('categories-status');
+    if (!grid || !window.API || typeof window.API.getCategories !== 'function') return;
+
+    if (statusEl) {
+        statusEl.classList.remove('hidden');
+        statusEl.textContent = 'Loading category intel...';
+        statusEl.className = 'md:col-span-2 lg:col-span-3 text-center text-on-surface-variant font-body-md py-4';
+    }
+
+    try {
+        const categories = await window.API.getCategories();
+
+        if (!Array.isArray(categories)) {
+            throw new Error('Unexpected response from server');
+        }
+
+        // Remove previously rendered cards (keep status + create-custom card)
+        grid.querySelectorAll('[data-category-card]').forEach((el) => el.remove());
+
+        const totalBudget = categories.reduce((sum, c) => sum + (Number(c.budget) || 0), 0);
+        const allocated = categories.reduce((sum, c) => sum + (Number(c.spent) || 0), 0);
+        const unallocated = totalBudget - allocated;
+        const overBudgetCount = categories.filter((c) => c.overBudget).length;
+
+        const totalEl = document.getElementById('categories-summary-total');
+        const allocatedEl = document.getElementById('categories-summary-allocated');
+        const unallocatedEl = document.getElementById('categories-summary-unallocated');
+        const overBudgetEl = document.getElementById('categories-summary-overbudget');
+
+        if (totalEl) totalEl.textContent = formatINR(totalBudget);
+        if (allocatedEl) allocatedEl.textContent = formatINR(allocated);
+        if (unallocatedEl) unallocatedEl.textContent = `${formatINR(Math.max(unallocated, 0))} unallocated`;
+        if (overBudgetEl) overBudgetEl.textContent = `${overBudgetCount} ${overBudgetCount === 1 ? 'Category' : 'Categories'}`;
+
+        if (categories.length === 0) {
+            if (statusEl) {
+                statusEl.classList.remove('hidden');
+                statusEl.textContent = 'No categories yet. Create your first suspect to start tracking.';
+            }
+            return;
+        }
+
+        if (statusEl) statusEl.classList.add('hidden');
+
+        const createCard = grid.querySelector('.border-dashed');
+        categories.forEach((cat) => {
+            const wrapper = document.createElement('div');
+            wrapper.setAttribute('data-category-card', '');
+            wrapper.innerHTML = categoryCardHTML(cat);
+            const card = wrapper.firstElementChild;
+            if (createCard) {
+                grid.insertBefore(card, createCard);
+            } else {
+                grid.appendChild(card);
+            }
+        });
+    } catch (error) {
+        if (statusEl) {
+            statusEl.classList.remove('hidden');
+            statusEl.textContent = `Could not load categories. ${error.message || 'Please try again later.'}`;
+            statusEl.className = 'md:col-span-2 lg:col-span-3 text-center text-error font-body-md py-4';
+        }
+    }
 };
 
 if (document.readyState === "loading") {
