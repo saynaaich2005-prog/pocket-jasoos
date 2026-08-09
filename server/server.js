@@ -19,9 +19,27 @@ const allowedOrigins = (process.env.CLIENT_URLS || '')
   .map((o) => o.trim())
   .filter(Boolean);
 
+const isDev = process.env.NODE_ENV === 'development';
+
+const isLocalOrigin = (origin) => {
+  try {
+    const { hostname } = new URL(origin);
+    return hostname === 'localhost' || hostname === '127.0.0.1';
+  } catch {
+    return false;
+  }
+};
+
+const corsOrigin = (origin, callback) => {
+  if (!origin) return callback(null, true);
+  if (isDev && isLocalOrigin(origin)) return callback(null, true);
+  if (allowedOrigins.includes(origin)) return callback(null, true);
+  callback(new Error('Not allowed by CORS'));
+};
+
 app.use(
   cors({
-    origin: allowedOrigins.length > 0 ? allowedOrigins : true,
+    origin: corsOrigin,
   })
 );
 app.use(express.json());
