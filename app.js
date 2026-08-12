@@ -277,6 +277,9 @@ const initApp = () => {
                             { scale: 1, opacity: 1, duration: 1, stagger: 0.15, ease: "elastic.out(1, 0.7)", delay: 0.2 }
                         );
                     }
+                    if (tabId === 'categories') {
+                        loadCategories();
+                    }
                 }, 50);
             } else {
                 panel.classList.add("hidden", "opacity-0");
@@ -443,6 +446,7 @@ const initApp = () => {
     preloadImages();
     initChartTooltips();
     loadCategories();
+    initCategoryInteractions();
 };
 
 // ----------------------------------------------------
@@ -490,14 +494,28 @@ const categoryCardHTML = (cat) => {
         <div class="flex justify-between items-start">
             <div class="flex items-center gap-3">
                 <div class="w-12 h-12 rounded-full flex items-center justify-center border" style="background:${iconBg};border-color:${iconBorder};">
-                    <span class="material-symbols-outlined text-2xl" style="color:${color};">${icon}</span>
+                    <span class="material-symbols-outlined text-2xl" style="color:${escapeHTML(color)};">${escapeHTML(icon)}</span>
                 </div>
                 <div>
                     <h3 class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors">${name}</h3>
                     ${description ? `<p class="text-xs text-on-surface-variant">${description}</p>` : ''}
                 </div>
             </div>
-            <button class="text-outline hover:text-on-surface transition-colors p-1"><span class="material-symbols-outlined text-[20px]">more_vert</span></button>
+            <div class="relative category-menu-wrap">
+                <button type="button" class="category-menu-btn text-outline hover:text-on-surface transition-colors p-1" aria-haspopup="true" aria-expanded="false" aria-label="Category actions">
+                    <span class="material-symbols-outlined text-[20px]">more_vert</span>
+                </button>
+                <div class="category-menu hidden absolute right-0 top-full mt-1 w-40 glass-card inner-glow rounded-xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8)] backdrop-blur-2xl py-1 z-50">
+                    <button type="button" class="w-full px-4 py-2.5 text-left text-sm text-on-surface hover:bg-surface-variant/30 flex items-center gap-2 transition-colors" data-action="edit">
+                        <span class="material-symbols-outlined text-base">edit</span>
+                        <span>Edit</span>
+                    </button>
+                    <button type="button" class="w-full px-4 py-2.5 text-left text-sm text-error hover:bg-error-container/20 flex items-center gap-2 transition-colors" data-action="delete">
+                        <span class="material-symbols-outlined text-base">delete</span>
+                        <span>Delete</span>
+                    </button>
+                </div>
+            </div>
         </div>
         <div class="mt-2">
             <div class="flex justify-between text-sm mb-2">
@@ -516,7 +534,14 @@ const categoryCardHTML = (cat) => {
 
     if (over) {
         return `
-            <div class="glass-card inner-glow rounded-xl p-6 flex flex-col gap-4 group hover:border-error/70 hover:bg-error-container/10 transition-all duration-300 cursor-pointer hover:scale-[1.02] border-error/30 relative">
+            <div class="glass-card inner-glow rounded-xl p-6 flex flex-col gap-4 group hover:border-error/70 hover:bg-error-container/10 transition-all duration-300 cursor-pointer hover:scale-[1.02] border-error/30 relative overflow-visible"
+                data-category-card=""
+                data-id="${cat._id}"
+                data-name="${escapeHTML(cat.name || '')}"
+                data-icon="${escapeHTML(cat.icon || 'category')}"
+                data-color="${escapeHTML(cat.color || '#ecb2ff')}"
+                data-budget="${Number(cat.budget) || ''}"
+                data-description="${escapeHTML(cat.description || '')}">
                 <div class="absolute top-0 right-0 w-16 h-16 bg-error/10 rounded-bl-full rounded-tr-xl flex items-start justify-end p-2 pointer-events-none">
                     <span class="material-symbols-outlined text-error text-sm">warning</span>
                 </div>
@@ -525,7 +550,14 @@ const categoryCardHTML = (cat) => {
     }
 
     return `
-        <div class="glass-card inner-glow rounded-xl p-6 flex flex-col gap-4 group hover:border-primary/40 transition-colors">
+        <div class="glass-card inner-glow rounded-xl p-6 flex flex-col gap-4 group hover:border-primary/40 transition-colors overflow-visible"
+            data-category-card=""
+            data-id="${cat._id}"
+            data-name="${escapeHTML(cat.name || '')}"
+            data-icon="${escapeHTML(cat.icon || 'category')}"
+            data-color="${escapeHTML(cat.color || '#ecb2ff')}"
+            data-budget="${Number(cat.budget) || ''}"
+            data-description="${escapeHTML(cat.description || '')}">
             ${body}
         </div>`;
 };
@@ -579,7 +611,6 @@ const loadCategories = async () => {
         const createCard = grid.querySelector('.border-dashed');
         categories.forEach((cat) => {
             const wrapper = document.createElement('div');
-            wrapper.setAttribute('data-category-card', '');
             wrapper.innerHTML = categoryCardHTML(cat);
             const card = wrapper.firstElementChild;
             if (createCard) {
@@ -595,6 +626,286 @@ const loadCategories = async () => {
             statusEl.className = 'md:col-span-2 lg:col-span-3 text-center text-error font-body-md py-4';
         }
     }
+};
+
+// ----------------------------------------------------
+// 10. Categories: Interactions (modal, menu, delete)
+// ----------------------------------------------------
+let pendingDeleteId = null;
+
+const showToast = (message, type = 'success') => {
+    const toast = document.getElementById('toast');
+    const messageEl = document.getElementById('toast-message');
+    const iconEl = document.getElementById('toast-icon');
+    if (!toast || !messageEl || !iconEl) return;
+
+    const isSuccess = type === 'success';
+    messageEl.textContent = message;
+    iconEl.textContent = isSuccess ? 'check_circle' : 'error';
+    iconEl.className = `material-symbols-outlined text-base ${isSuccess ? 'text-secondary-container' : 'text-error'}`;
+
+    toast.classList.remove('hidden');
+    toast.classList.add('flex');
+
+    clearTimeout(toast._hideTimer);
+    toast._hideTimer = setTimeout(() => {
+        toast.classList.add('hidden');
+        toast.classList.remove('flex');
+    }, 3000);
+};
+
+const closeAllCategoryMenus = () => {
+    document.querySelectorAll('#categories-grid .category-menu:not(.hidden)').forEach((menu) => {
+        menu.classList.add('hidden');
+        const btn = menu.closest('.category-menu-wrap')?.querySelector('.category-menu-btn');
+        if (btn) btn.setAttribute('aria-expanded', 'false');
+    });
+};
+
+const toggleCategoryMenu = (btn) => {
+    const wrap = btn.closest('.category-menu-wrap');
+    const menu = wrap && wrap.querySelector('.category-menu');
+    if (!menu) return;
+
+    const wasOpen = !menu.classList.contains('hidden');
+    closeAllCategoryMenus();
+    if (!wasOpen) {
+        menu.classList.remove('hidden');
+        btn.setAttribute('aria-expanded', 'true');
+    }
+};
+
+const showModalError = (id, message) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = message;
+    el.classList.remove('hidden');
+};
+
+const hideModalError = (id) => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('hidden');
+};
+
+const openCategoryModal = (category = null) => {
+    const modal = document.getElementById('category-modal');
+    if (!modal) return;
+
+    const isEdit = Boolean(category);
+
+    document.getElementById('category-id').value = isEdit ? category._id : '';
+    document.getElementById('category-name').value = isEdit ? (category.name || '') : '';
+    document.getElementById('category-budget').value = isEdit ? (catBudgetToString(category.budget)) : '';
+    document.getElementById('category-description').value = isEdit ? (category.description || '') : '';
+
+    const title = document.getElementById('category-modal-title');
+    const label = document.getElementById('category-save-label');
+    const subtitle = document.getElementById('category-modal-subtitle');
+    if (title) title.textContent = isEdit ? 'Edit Category' : 'New Category';
+    if (label) label.textContent = isEdit ? 'Save Changes' : 'Add Category';
+    if (subtitle) subtitle.textContent = isEdit ? 'Update this suspect\'s intel.' : 'Set a budget for a regular suspect.';
+
+    const saveBtn = document.getElementById('category-save-btn');
+    if (saveBtn) saveBtn.disabled = false;
+
+    hideModalError('category-modal-error');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    const nameField = document.getElementById('category-name');
+    if (nameField) nameField.focus();
+};
+
+const catBudgetToString = (value) => {
+    const n = Number(value);
+    if (Number.isFinite(n) && n >= 0) return String(n);
+    return '';
+};
+
+const closeCategoryModal = () => {
+    const modal = document.getElementById('category-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+};
+
+const handleCategorySubmit = async (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById('category-name').value.trim();
+    if (!name) {
+        showModalError('category-modal-error', 'Category name is required.');
+        return;
+    }
+
+    const budgetRaw = document.getElementById('category-budget').value;
+    if (budgetRaw.trim() === '') {
+        showModalError('category-modal-error', 'Monthly budget is required.');
+        return;
+    }
+    const budget = Number(budgetRaw);
+    if (!Number.isFinite(budget) || budget < 0) {
+        showModalError('category-modal-error', 'Budget must be a valid amount of ₹0 or more.');
+        return;
+    }
+
+    const payload = {
+        name,
+        budget,
+        description: document.getElementById('category-description').value.trim(),
+    };
+
+    const categoryId = document.getElementById('category-id').value;
+    const saveBtn = document.getElementById('category-save-btn');
+    const saveLabel = document.getElementById('category-save-label');
+    const originalLabel = saveLabel ? saveLabel.textContent : 'Add Category';
+    if (saveBtn) saveBtn.disabled = true;
+    if (saveLabel) saveLabel.textContent = 'Saving...';
+
+    try {
+        if (categoryId) {
+            await window.API.updateCategory(categoryId, payload);
+            showToast('Category updated successfully.');
+        } else {
+            await window.API.createCategory(payload);
+            showToast('Category created successfully.');
+        }
+        closeCategoryModal();
+        loadCategories();
+    } catch (error) {
+        showModalError('category-modal-error', error.message || 'Something went wrong. Please try again.');
+        if (saveBtn) saveBtn.disabled = false;
+        if (saveLabel) saveLabel.textContent = originalLabel;
+    }
+};
+
+const openCategoryDeleteConfirm = (id, name) => {
+    pendingDeleteId = id;
+    const nameEl = document.getElementById('category-confirm-name');
+    if (nameEl) nameEl.textContent = name || 'this category';
+
+    const deleteBtn = document.getElementById('category-confirm-delete');
+    if (deleteBtn) {
+        deleteBtn.disabled = false;
+        deleteBtn.innerHTML = deleteBtn.dataset.originalHtml || '<span class="material-symbols-outlined text-sm">delete</span><span>Delete</span>';
+    }
+
+    hideModalError('category-confirm-error');
+    const modal = document.getElementById('category-confirm-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+};
+
+const closeCategoryDeleteConfirm = () => {
+    pendingDeleteId = null;
+    const modal = document.getElementById('category-confirm-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+};
+
+const handleCategoryDelete = async () => {
+    if (!pendingDeleteId) return;
+
+    const deleteBtn = document.getElementById('category-confirm-delete');
+    const originalHTML = deleteBtn ? deleteBtn.dataset.originalHtml : '';
+    if (deleteBtn) {
+        if (!deleteBtn.dataset.originalHtml) deleteBtn.dataset.originalHtml = deleteBtn.innerHTML;
+        deleteBtn.disabled = true;
+        deleteBtn.innerHTML = '<span class="material-symbols-outlined text-sm">hourglass_empty</span><span>Deleting...</span>';
+    }
+
+    try {
+        await window.API.deleteCategory(pendingDeleteId);
+        closeCategoryDeleteConfirm();
+        showToast('Category deleted.');
+        loadCategories();
+    } catch (error) {
+        showToast(error.message || 'Could not delete category. Please try again.', 'error');
+        if (deleteBtn) {
+            deleteBtn.disabled = false;
+            deleteBtn.innerHTML = originalHTML || deleteBtn.dataset.originalHtml;
+        }
+    }
+};
+
+const initCategoryInteractions = () => {
+    const newBtn = document.getElementById('new-category-btn');
+    if (newBtn) newBtn.addEventListener('click', () => openCategoryModal(null));
+
+    const createCard = document.getElementById('create-custom-card');
+    if (createCard) createCard.addEventListener('click', () => openCategoryModal(null));
+
+    const grid = document.getElementById('categories-grid');
+    if (grid) {
+        grid.addEventListener('click', (e) => {
+            const menuBtn = e.target.closest('.category-menu-btn');
+            if (menuBtn) {
+                e.stopPropagation();
+                toggleCategoryMenu(menuBtn);
+                return;
+            }
+
+            const menuItem = e.target.closest('[data-action]');
+            if (menuItem) {
+                e.stopPropagation();
+                const card = menuItem.closest('[data-id]');
+                if (!card) return;
+
+                if (menuItem.getAttribute('data-action') === 'edit') {
+                    openCategoryModal({
+                        _id: card.dataset.id,
+                        name: card.dataset.name,
+                        icon: card.dataset.icon,
+                        color: card.dataset.color,
+                        budget: card.dataset.budget,
+                        description: card.dataset.description,
+                    });
+                } else if (menuItem.getAttribute('data-action') === 'delete') {
+                    openCategoryDeleteConfirm(card.dataset.id, card.dataset.name);
+                }
+                closeAllCategoryMenus();
+            }
+        });
+    }
+
+    const form = document.getElementById('category-form');
+    if (form) form.addEventListener('submit', handleCategorySubmit);
+
+    const modalCancel = document.getElementById('category-cancel-btn');
+    if (modalCancel) modalCancel.addEventListener('click', closeCategoryModal);
+
+    const modalClose = document.getElementById('category-modal-close');
+    if (modalClose) modalClose.addEventListener('click', closeCategoryModal);
+
+    const modalBackdrop = document.getElementById('category-modal-backdrop');
+    if (modalBackdrop) modalBackdrop.addEventListener('click', closeCategoryModal);
+
+    const confirmCancel = document.getElementById('category-confirm-cancel');
+    if (confirmCancel) confirmCancel.addEventListener('click', closeCategoryDeleteConfirm);
+
+    const confirmDelete = document.getElementById('category-confirm-delete');
+    if (confirmDelete) confirmDelete.addEventListener('click', handleCategoryDelete);
+
+    const confirmBackdrop = document.getElementById('category-confirm-backdrop');
+    if (confirmBackdrop) confirmBackdrop.addEventListener('click', closeCategoryDeleteConfirm);
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.category-menu') && !e.target.closest('.category-menu-btn')) {
+            closeAllCategoryMenus();
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeCategoryModal();
+            closeCategoryDeleteConfirm();
+            closeAllCategoryMenus();
+        }
+    });
 };
 
 if (document.readyState === "loading") {

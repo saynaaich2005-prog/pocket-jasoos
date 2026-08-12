@@ -816,7 +816,7 @@
                                 Investigate your spending limits. Set budgets for your regular suspects and keep an eye on where the money goes.
                             </p>
                         </div>
-                        <button class="bg-surface-container-high border border-outline/30 hover:border-primary/50 text-on-surface font-label-md py-2.5 px-5 rounded-full flex items-center gap-2 transition-all w-fit self-start md:self-auto shadow-md">
+                        <button id="new-category-btn" class="bg-surface-container-high border border-outline/30 hover:border-primary/50 text-on-surface font-label-md py-2.5 px-5 rounded-full flex items-center gap-2 transition-all w-fit self-start md:self-auto shadow-md">
                             <span class="material-symbols-outlined text-primary text-sm">add_circle</span>
                             New Category
                         </button>
@@ -859,7 +859,7 @@
                     <!-- Categories Grid -->
                     <div id="categories-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div id="categories-status" class="md:col-span-2 lg:col-span-3 hidden"></div>
-                        <div class="glass-card border-dashed border-2 border-outline/30 rounded-xl p-6 flex flex-col items-center justify-center gap-4 text-outline hover:text-primary hover:border-primary/50 hover:bg-primary-container/10 transition-all duration-300 cursor-pointer min-h-[160px] group hover:scale-[1.02]">
+                        <div id="create-custom-card" class="glass-card border-dashed border-2 border-outline/30 rounded-xl p-6 flex flex-col items-center justify-center gap-4 text-outline hover:text-primary hover:border-primary/50 hover:bg-primary-container/10 transition-all duration-300 cursor-pointer min-h-[160px] group hover:scale-[1.02]">
                             <div class="flex-1 flex flex-col items-center justify-center gap-3 py-4 text-center cursor-pointer">
                                 <div class="w-14 h-14 rounded-full bg-surface-variant/30 flex items-center justify-center text-outline group-hover:text-primary transition-colors group-hover:bg-primary-container/10">
                                     <span class="material-symbols-outlined text-3xl">add</span>
@@ -906,6 +906,77 @@
     <div id="chart-tooltip" role="tooltip">
         <span class="tooltip-category"></span>
         <span class="tooltip-amount"></span>
+    </div>
+
+    <!-- Category Create/Edit Modal -->
+    <div id="category-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+        <div id="category-modal-backdrop" class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+        <div class="relative glass-card inner-glow rounded-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8)] w-full max-w-md max-h-[90vh] overflow-y-auto p-6">
+            <div class="flex justify-between items-start mb-5">
+                <div>
+                    <h3 id="category-modal-title" class="font-headline-lg text-headline-lg text-on-surface">New Category</h3>
+                    <p id="category-modal-subtitle" class="text-sm text-on-surface-variant mt-1 font-body-md">Set a budget for a regular suspect.</p>
+                </div>
+                <button type="button" id="category-modal-close" aria-label="Close" class="text-on-surface-variant hover:text-on-surface p-1 transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <form id="category-form" class="space-y-4">
+                <input type="hidden" id="category-id" />
+                <div>
+                    <label for="category-name" class="block text-xs font-label-sm text-on-surface-variant uppercase tracking-wider mb-1.5">Name *</label>
+                    <input id="category-name" type="text" required autocomplete="off" placeholder="e.g. Coffee Runs"
+                        class="w-full bg-surface-variant/30 border border-white/10 rounded-xl px-4 py-2.5 text-body-md text-on-surface focus:outline-none focus:border-primary/50 placeholder:text-on-surface-variant/50" />
+                </div>
+                <div>
+                    <label for="category-budget" class="block text-xs font-label-sm text-on-surface-variant uppercase tracking-wider mb-1.5">Monthly Budget (₹)</label>
+                    <input id="category-budget" type="number" min="0" step="1" placeholder="0"
+                        class="w-full bg-surface-variant/30 border border-white/10 rounded-xl px-4 py-2.5 text-body-md text-on-surface focus:outline-none focus:border-primary/50 placeholder:text-on-surface-variant/50" />
+                </div>
+                <div>
+                    <label for="category-description" class="block text-xs font-label-sm text-on-surface-variant uppercase tracking-wider mb-1.5">Description</label>
+                    <textarea id="category-description" rows="2" placeholder="Why is this suspect on the list?"
+                        class="w-full bg-surface-variant/30 border border-white/10 rounded-xl px-4 py-2.5 text-body-md text-on-surface focus:outline-none focus:border-primary/50 placeholder:text-on-surface-variant/50 resize-none"></textarea>
+                </div>
+                <div id="category-modal-error" class="hidden text-sm text-error bg-error-container/10 border border-error/20 rounded-lg px-3 py-2 font-body-md"></div>
+                <div class="flex gap-3 pt-1">
+                    <button type="button" id="category-cancel-btn" class="flex-1 bg-surface-variant/30 border border-white/10 text-on-surface font-label-md py-2.5 px-5 rounded-full transition-colors hover:bg-surface-variant/50">Cancel</button>
+                    <button type="submit" id="category-save-btn" class="flex-1 bg-primary-container hover:bg-primary-fixed text-on-primary-container font-label-md py-2.5 px-5 rounded-full transition-all flex items-center justify-center gap-2 shadow-md">
+                        <span class="material-symbols-outlined text-sm">add_circle</span>
+                        <span id="category-save-label">Add Category</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Category Delete Confirmation Modal -->
+    <div id="category-confirm-modal" class="fixed inset-0 z-[110] hidden items-center justify-center p-4">
+        <div id="category-confirm-backdrop" class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+        <div class="relative glass-card inner-glow rounded-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8)] w-full max-w-sm p-6">
+            <div class="flex items-center gap-3 mb-3">
+                <span class="material-symbols-outlined text-error text-2xl">warning</span>
+                <h3 class="font-headline-md text-headline-md text-on-surface">Delete Category?</h3>
+            </div>
+            <p class="text-sm text-on-surface-variant font-body-md mb-5">
+                Deleting <span id="category-confirm-name" class="text-on-surface font-medium">this category</span> will permanently remove it and
+                <span class="text-error font-medium">all of its associated transactions</span>. This cannot be undone.
+            </p>
+            <div id="category-confirm-error" class="hidden text-sm text-error bg-error-container/10 border border-error/20 rounded-lg px-3 py-2 mb-4 font-body-md"></div>
+            <div class="flex gap-3">
+                <button type="button" id="category-confirm-cancel" class="flex-1 bg-surface-variant/30 border border-white/10 text-on-surface font-label-md py-2.5 px-5 rounded-full transition-colors hover:bg-surface-variant/50">Cancel</button>
+                <button type="button" id="category-confirm-delete" class="flex-1 bg-error-container/80 hover:bg-error-container text-on-error font-label-md py-2.5 px-5 rounded-full transition-colors flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-sm">delete</span>
+                    <span>Delete</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Feedback -->
+    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-[150] hidden items-center gap-2 glass-card inner-glow rounded-full border border-white/10 px-4 py-2.5 text-sm font-body-md text-on-surface shadow-[0_10px_30px_rgba(0,0,0,0.6)]">
+        <span id="toast-icon" class="material-symbols-outlined text-base"></span>
+        <span id="toast-message"></span>
     </div>
 
     <!-- GSAP Libraries (only load for authenticated sessions) -->
