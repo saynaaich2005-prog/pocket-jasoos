@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pocket Jasoos - Expense Records</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Montserrat:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed": "#f8d8ff",
+                    "outline": "#9d8ba0",
+                    "primary-container": "#bd00ff",
+                    "surface-container-highest": "#353436",
+                    "error": "#ffb4ab",
+                    "on-surface-variant": "#d4c0d7",
+                    "surface-tint": "#ecb2ff",
+                    "on-primary-fixed": "#320047",
+                    "surface-container-high": "#2a2a2b",
+                    "primary-fixed-dim": "#ecb2ff",
+                    "on-primary-fixed-variant": "#74009f",
+                    "inverse-on-surface": "#313031",
+                    "surface-container-low": "#1c1b1c",
+                    "on-tertiary-fixed": "#370e00",
+                    "on-tertiary": "#5a1b00",
+                    "inverse-surface": "#e5e2e3",
+                    "error-container": "#93000a",
+                    "surface-bright": "#3a393a",
+                    "tertiary": "#ffb59a",
+                    "secondary-container": "#00eefc",
+                    "background": "#131314",
+                    "secondary-fixed-dim": "#00dbe9",
+                    "on-background": "#e5e2e3",
+                    "surface-container-lowest": "#0e0e0f",
+                    "on-primary": "#520071",
+                    "surface": "#131314",
+                    "on-surface": "#e5e2e3",
+                    "on-secondary-fixed-variant": "#004f54",
+                    "on-secondary-container": "#00686f",
+                    "tertiary-fixed": "#ffdbce",
+                    "surface-container": "#201f20",
+                    "tertiary-container": "#cf4900",
+                    "on-secondary": "#00363a",
+                    "inverse-primary": "#9900cf",
+                    "on-primary-container": "#ffffff",
+                    "on-tertiary-container": "#fffeff",
+                    "primary": "#ecb2ff",
+                    "surface-dim": "#131314",
+                    "tertiary-fixed-dim": "#ffb59a",
+                    "on-error": "#690005",
+                    "secondary-fixed": "#7df4ff",
+                    "on-tertiary-fixed-variant": "#802a00",
+                    "secondary": "#d3fbff",
+                    "on-secondary-fixed": "#002022",
+                    "surface-variant": "#353436",
+                    "on-error-container": "#ffdad6",
+                    "outline-variant": "#514255"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gutter": "24px",
+                    "margin-mobile": "16px",
+                    "max-width": "1200px",
+                    "unit": "8px",
+                    "margin-desktop": "48px"
+            },
+            "fontFamily": {
+                    "headline-xl": ["Montserrat"],
+                    "headline-sm": ["Montserrat"],
+                    "label-sm": ["Inter"],
+                    "headline-md": ["Montserrat"],
+                    "headline-lg-mobile": ["Montserrat"],
+                    "headline-lg": ["Montserrat"],
+                    "body-lg": ["Inter"],
+                    "body-md": ["Inter"],
+                    "label-md": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #353436;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #514255;
+        }
+        
+        .doodle-border {
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+        }
+        
+        .glass-card {
+            background: rgba(24, 24, 27, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- App Wrapper -->
+<div class="flex h-screen overflow-hidden">
+<!-- ========================================== -->
+<!-- SHARED COMPONENT: SideNavBar (Desktop)     -->
+<!-- ========================================== -->
+<nav class="fixed left-0 top-0 h-full z-40 hidden md:flex flex-col bg-background dark:bg-background h-screen w-64 border-r border-white/10 bg-surface-container-low backdrop-blur-xl shadow-xl">
+<!-- Header/Brand -->
+<div class="p-6 pb-8 border-b border-white/5">
+<div class="flex items-center gap-3 mb-6">
+<div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-container">search</span>
+</div>
+<div class="font-headline-lg text-headline-lg font-bold text-primary">Pocket Jasoos</div>
+</div>
+<div class="flex items-center gap-3">
+<img alt="Detective User Profile" class="w-12 h-12 rounded-full object-cover border border-outline-variant" data-alt="A stylized, high-quality digital portrait of a smart, modern financial detective avatar with subtle neon cyberpunk accents in a dark studio setting. The aesthetic is sleek, professional, and slightly mysterious." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDXXg7SO_dyxmPr_AciTr56eQ9YN6jIJ7xIBquhToQnKsoFx_i-v89MsWo75VkLTl_0AVKkS9WmtMsi5bhl5K0xUw_aW0_H-nE3KI3o9-7YGdfqrs6UhEv2jV4tJL3eD1_LPF4otyDP9dbw18PlanNJsa7apYQzU9xZw6ICzblvzqQmOrEheiNWfgp_pac50sgKriHiEV0pjjnmb4uNUwgWl_pbEVTN5S2eRtsQtrJAem1QCvHRvvGaVQ"/>
+<div>
+<div class="font-label-md text-label-md text-on-surface">Agent J</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">Financial Investigator</div>
+</div>
+</div>
+</div>
+<!-- Navigation Links -->
+<div class="flex-1 overflow-y-auto py-6 space-y-2">
+<!-- Dashboard (Inactive) -->
+<a class="text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/50 rounded-lg mx-2 px-4 py-3 flex items-center gap-3 transition-all scale-95 active:scale-90 font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                    Dashboard
+                </a>
+<!-- Expenses (Active - Semantic Match for "Daily Expense Records") -->
+<a class="bg-primary-container text-on-primary-container rounded-lg font-bold mx-2 px-4 py-3 flex items-center gap-3 scale-95 active:scale-90 transition-transform font-label-md text-label-md shadow-[0_0_15px_rgba(189,0,255,0.3)]" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+                    Expenses
+                </a>
+<!-- Analytics (Inactive) -->
+<a class="text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/50 rounded-lg mx-2 px-4 py-3 flex items-center gap-3 transition-all scale-95 active:scale-90 font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">query_stats</span>
+                    Analytics
+                </a>
+<!-- Categories (Inactive) -->
+<a class="text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/50 rounded-lg mx-2 px-4 py-3 flex items-center gap-3 transition-all scale-95 active:scale-90 font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">category</span>
+                    Categories
+                </a>
+<!-- Settings (Inactive) -->
+<a class="text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/50 rounded-lg mx-2 px-4 py-3 flex items-center gap-3 transition-all scale-95 active:scale-90 font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">settings</span>
+                    Settings
+                </a>
+</div>
+<!-- CTA -->
+<div class="p-6">
+<button class="w-full bg-secondary-container hover:bg-secondary-fixed text-on-secondary-container font-label-md text-label-md font-bold py-3 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">add</span>
+                    Quick Add
+                </button>
+</div>
+</nav>
+<!-- ========================================== -->
+<!-- Main Content Canvas                        -->
+<!-- ========================================== -->
+<main class="flex-1 flex flex-col min-w-0 md:ml-64 relative">
+<!-- SHARED COMPONENT: TopAppBar -->
+<header class="sticky top-0 w-full z-30 flex justify-between items-center px-gutter py-4 bg-background/80 backdrop-blur-md full-width top-0 border-b border-white/5">
+<!-- Mobile Logo/Menu -->
+<div class="flex md:hidden items-center gap-3">
+<div class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary">Pocket Jasoos</div>
+</div>
+<!-- Desktop Page Title -->
+<div class="hidden md:block font-headline-md text-headline-md font-bold text-on-surface">
+                    Expense Records
+                </div>
+<!-- Right Actions -->
+<div class="flex items-center gap-2">
+<!-- Search Bar (on_right) -->
+<div class="hidden md:flex items-center bg-surface-container rounded-full px-4 py-2 focus-within:ring-2 focus-within:ring-secondary transition-all">
+<span class="material-symbols-outlined text-on-surface-variant text-sm mr-2">search</span>
+<input class="bg-transparent border-none outline-none text-label-md font-label-md text-on-surface placeholder-on-surface-variant focus:ring-0 w-48" placeholder="Search clues..." type="text"/>
+</div>
+<button class="text-on-surface-variant hover:bg-surface-variant/20 rounded-full p-2 transition-colors">
+<span class="material-symbols-outlined">calendar_month</span>
+</button>
+<button class="text-on-surface-variant hover:bg-surface-variant/20 rounded-full p-2 transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<img alt="User Profile Avatar" class="w-8 h-8 rounded-full ml-2 md:hidden object-cover border border-outline" data-alt="A tiny, high-contrast, stylish avatar icon for a user profile, dark background, sharp lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCO9opqPN5qRaDK-KLHUi7i3IFVGh9bTxggXipG0PKFt8to_fRZ7RkiWA13wg9axHMBZPhhgIuIMRdDsKPqZ1qGBNIxcEqnWGVrjkPhhS41-XjoRBrC6gBwPk-aqH5QSULl918rgKUe0IK9XzEWPQjG6h0V5ld6hjjq3152vpHB4tqEDXdvj4PGOVL-GhG3dQTWWj80WS3bvyEZn3ozs-Us09px-nHygC2RIgxgxZM-s2FrRQQsVG6K7g"/>
+</div>
+</header>
+<!-- Scrollable Content Area -->
+<div class="flex-1 overflow-y-auto p-margin-mobile md:p-margin-desktop pb-32">
+<div class="max-w-max-width mx-auto space-y-8">
+<!-- Top Summary Bento -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<!-- Main Spend Card -->
+<div class="md:col-span-2 glass-card rounded-3xl p-6 relative overflow-hidden group">
+<!-- Radiant Glow effect -->
+<div class="absolute -top-24 -right-24 w-64 h-64 bg-error/20 rounded-full blur-3xl group-hover:bg-error/30 transition-all duration-700"></div>
+<div class="relative z-10">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">October Spends</h2>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">The evidence so far...</p>
+</div>
+<div class="bg-surface-container-highest px-3 py-1 rounded-full font-label-sm text-label-sm text-on-surface flex items-center gap-1 border border-white/5">
+<span class="material-symbols-outlined text-[16px]">pie_chart</span>
+                                        Overview
+                                    </div>
+</div>
+<div class="font-headline-xl text-headline-xl text-error mb-2 tracking-tight">
+                                    - ₹ 14,820
+                                </div>
+<div class="flex items-center gap-2 text-on-surface-variant font-label-md text-label-md doodle-border px-3 py-2 inline-flex">
+<span class="material-symbols-outlined text-[18px] text-tertiary">warning</span>
+<span>"Itna gaya... Pata hi nahi chala!"</span>
+</div>
+</div>
+</div>
+<!-- Quick Stat Card -->
+<div class="glass-card rounded-3xl p-6 flex flex-col justify-between">
+<div>
+<div class="w-10 h-10 rounded-xl bg-secondary-container/20 flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-secondary-fixed">fastfood</span>
+</div>
+<h3 class="font-label-md text-label-md text-on-surface-variant">Top Suspect</h3>
+<div class="font-headline-md text-headline-md text-on-surface mt-1">Food &amp; Drinks</div>
+</div>
+<div class="mt-4 pt-4 border-t border-white/10">
+<span class="font-body-md text-body-md text-error">₹ 4,250</span>
+<span class="text-on-surface-variant font-label-sm text-label-sm ml-2">this month</span>
+</div>
+</div>
+</section>
+<!-- Filters & Search Toolbar -->
+<section class="flex flex-col sm:flex-row justify-between items-center gap-4">
+<div class="flex gap-2 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0 hide-scrollbar">
+<button class="whitespace-nowrap px-4 py-2 rounded-full bg-primary-container text-on-primary-container font-label-md text-label-md shadow-[0_0_10px_rgba(189,0,255,0.2)]">All Suspects</button>
+<button class="whitespace-nowrap px-4 py-2 rounded-full bg-surface-container-high border border-white/10 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant font-label-md text-label-md transition-colors">Food</button>
+<button class="whitespace-nowrap px-4 py-2 rounded-full bg-surface-container-high border border-white/10 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant font-label-md text-label-md transition-colors">Shopping</button>
+<button class="whitespace-nowrap px-4 py-2 rounded-full bg-surface-container-high border border-white/10 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant font-label-md text-label-md transition-colors">Movies</button>
+</div>
+<div class="flex items-center gap-2 w-full sm:w-auto">
+<div class="flex-1 sm:hidden items-center bg-surface-container rounded-full px-4 py-2 focus-within:ring-2 focus-within:ring-secondary transition-all">
+<span class="material-symbols-outlined text-on-surface-variant text-sm mr-2">search</span>
+<input class="bg-transparent border-none outline-none text-label-md font-label-md text-on-surface placeholder-on-surface-variant focus:ring-0 w-full" placeholder="Search clues..." type="text"/>
+</div>
+<button class="p-2 rounded-xl bg-surface-container-high border border-white/10 text-on-surface-variant hover:text-on-surface">
+<span class="material-symbols-outlined">filter_list</span>
+</button>
+</div>
+</section>
+<!-- Transaction List -->
+<section class="space-y-6">
+<!-- Day Group: Today -->
+<div class="space-y-3">
+<div class="flex justify-between items-end border-b border-white/10 pb-2">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Today <span class="text-on-surface-variant font-body-md text-body-md ml-2">Oct 24</span></h3>
+<span class="font-label-md text-label-md text-on-surface-variant">Daily Total: <span class="text-error">₹ 1,290</span></span>
+</div>
+<!-- Transaction Item -->
+<div class="glass-card rounded-2xl p-4 flex items-center justify-between hover:bg-surface-variant/30 transition-colors group cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-[#2a2a2b] border border-white/5 flex items-center justify-center relative overflow-hidden">
+<div class="absolute inset-0 bg-tertiary-container/10"></div>
+<span class="material-symbols-outlined text-tertiary">fastfood</span>
+</div>
+<div>
+<div class="font-label-md text-label-md text-on-surface">Late night cravings</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">Food • 11:42 PM</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-headline-sm text-headline-sm text-on-surface">-₹ 840</div>
+</div>
+</div>
+<!-- Transaction Item -->
+<div class="glass-card rounded-2xl p-4 flex items-center justify-between hover:bg-surface-variant/30 transition-colors group cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-[#2a2a2b] border border-white/5 flex items-center justify-center relative overflow-hidden">
+<div class="absolute inset-0 bg-primary-container/10"></div>
+<span class="material-symbols-outlined text-primary-fixed">movie</span>
+</div>
+<div>
+<div class="font-label-md text-label-md text-on-surface">Cinema Ticket</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">Entertainment • 8:15 PM</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-headline-sm text-headline-sm text-on-surface">-₹ 450</div>
+</div>
+</div>
+</div>
+<!-- Day Group: Yesterday -->
+<div class="space-y-3 mt-8">
+<div class="flex justify-between items-end border-b border-white/10 pb-2">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Yesterday <span class="text-on-surface-variant font-body-md text-body-md ml-2">Oct 23</span></h3>
+<span class="font-label-md text-label-md text-on-surface-variant">Daily Total: <span class="text-error">₹ 4,770</span></span>
+</div>
+<!-- Transaction Item -->
+<div class="glass-card rounded-2xl p-4 flex items-center justify-between hover:bg-surface-variant/30 transition-colors group cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-[#2a2a2b] border border-white/5 flex items-center justify-center relative overflow-hidden">
+<div class="absolute inset-0 bg-secondary-container/10"></div>
+<span class="material-symbols-outlined text-secondary-fixed">shopping_bag</span>
+</div>
+<div>
+<div class="font-label-md text-label-md text-on-surface">New Sneakers</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">Shopping • 4:30 PM</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-headline-sm text-headline-sm text-on-surface">-₹ 3,620</div>
+</div>
+</div>
+<!-- Transaction Item -->
+<div class="glass-card rounded-2xl p-4 flex items-center justify-between hover:bg-surface-variant/30 transition-colors group cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-[#2a2a2b] border border-white/5 flex items-center justify-center relative overflow-hidden">
+<div class="absolute inset-0 bg-secondary-container/10"></div>
+<span class="material-symbols-outlined text-secondary-fixed">sports_esports</span>
+</div>
+<div>
+<div class="font-label-md text-label-md text-on-surface">Game Purchase</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">Games • 1:15 PM</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-headline-sm text-headline-sm text-on-surface">-₹ 1,150</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+<!-- Floating Action Button (Mobile focused, visible on right) -->
+<button class="fixed bottom-24 md:bottom-8 right-6 w-14 h-14 bg-primary-container hover:bg-primary-fixed text-on-primary-container rounded-2xl shadow-[0_10px_25px_rgba(189,0,255,0.4)] flex items-center justify-center transition-transform hover:-translate-y-1 z-40">
+<span class="material-symbols-outlined text-[28px]">add</span>
+</button>
+</main>
+<!-- ========================================== -->
+<!-- SHARED COMPONENT: BottomNavBar (Mobile)    -->
+<!-- ========================================== -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-safe pt-3 md:hidden bg-surface-container-highest/90 backdrop-blur-2xl docked full-width bottom-0 rounded-t-3xl border-t border-white/10 shadow-[0_-10px_20px_rgba(0,0,0,0.4)]">
+<!-- Home (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-60 active:bg-surface-variant/40 tap-highlight-transparent font-label-sm text-label-sm w-16" href="#">
+<span class="material-symbols-outlined mb-1 text-[24px]">home</span>
+                Home
+            </a>
+<!-- Activity (Active - Semantic match for Expenses/Records) -->
+<a class="flex flex-col items-center justify-center text-secondary-fixed bg-secondary-container/20 rounded-xl px-4 py-1 tap-highlight-transparent font-label-sm text-label-sm w-16" href="#">
+<span class="material-symbols-outlined mb-1 text-[24px]" style="font-variation-settings: 'FILL' 1;">list_alt</span>
+                Activity
+            </a>
+<!-- Analysis (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-60 active:bg-surface-variant/40 tap-highlight-transparent font-label-sm text-label-sm w-16" href="#">
+<span class="material-symbols-outlined mb-1 text-[24px]">insights</span>
+                Analysis
+            </a>
+<!-- Account (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-60 active:bg-surface-variant/40 tap-highlight-transparent font-label-sm text-label-sm w-16" href="#">
+<span class="material-symbols-outlined mb-1 text-[24px]">person</span>
+                Account
+            </a>
+</nav>
+</div>
+</body></html>

@@ -95,9 +95,19 @@ document.addEventListener("DOMContentLoaded", () => {
     // 3. Canvas Aspect-Ratio Preserving Cover Draw
     // ----------------------------------------------------
     const resizeCanvas = () => {
-        if (!canvas) return;
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        if (!canvas || !ctx) return;
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+
+        canvas.width = Math.floor(w * dpr);
+        canvas.height = Math.floor(h * dpr);
+        canvas.style.width = w + "px";
+        canvas.style.height = h + "px";
+
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+
         if (isPreloadDone) {
             renderFrame(Math.round(playhead.frame));
         }
@@ -110,32 +120,17 @@ document.addEventListener("DOMContentLoaded", () => {
         const ih = img.naturalHeight || img.height;
         if (!iw || !ih) return;
         
-        const r = Math.min(w / iw, h / ih);
+        const r = Math.max(w / iw, h / ih);
         let nw = iw * r;
         let nh = ih * r;
-        let cx, cy, cw, ch, al = 1;
 
-        if (nw < w) { al = w / nw; }
-        if (Math.abs(nh - h) < 1) { al = h / nh; }
-        
-        if (al !== 1) {
-            nw *= al;
-            nh *= al;
-        }
-
-        cw = iw / (nw / w);
-        ch = ih / (nh / h);
-
-        cx = (iw - cw) * offsetX;
-        cy = (ih - ch) * offsetY;
-
-        if (cx < 0) cx = 0;
-        if (cy < 0) cy = 0;
-        if (cw > iw) cw = iw;
-        if (ch > ih) ch = ih;
+        let cx = (nw - w) * offsetX;
+        let cy = (nh - h) * offsetY;
 
         ctx.clearRect(0, 0, w, h);
-        ctx.drawImage(img, cx, cy, cw, ch, x, y, w, h);
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+        ctx.drawImage(img, 0, 0, iw, ih, -cx, -cy, nw, nh);
     };
 
     const renderFrame = (index) => {
@@ -146,6 +141,19 @@ document.addEventListener("DOMContentLoaded", () => {
             if (hudFrameNum) {
                 hudFrameNum.textContent = pad(frameIndex, 3);
             }
+        }
+    };
+
+    // Helper to reveal top header bar with pop-out spring effect
+    const revealTopHeader = () => {
+        const topHeader = document.getElementById("top-header");
+        if (topHeader && !topHeader.classList.contains("header-visible")) {
+            topHeader.classList.remove("-translate-y-full", "opacity-0", "pointer-events-none");
+            topHeader.classList.add("header-visible");
+            gsap.fromTo("#top-header", 
+                { y: -100, opacity: 0 },
+                { y: 0, opacity: 1, duration: 1.1, ease: "elastic.out(1, 0.65)" }
+            );
         }
     };
 
@@ -170,7 +178,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             },
             onComplete: () => {
-                // Show radiant intro
+                // 1. Pop out top header AFTER animation completes
+                revealTopHeader();
+
+                // 2. Show radiant intro overlay
                 const radiant = document.getElementById('radiant-intro');
                 if (radiant) {
                     radiant.classList.remove('hidden');
@@ -178,10 +189,19 @@ document.addEventListener("DOMContentLoaded", () => {
                     setTimeout(() => {
                         radiant.classList.remove('opacity-0', 'pointer-events-none');
                         
-                        // 3D Pop out animation
-                        gsap.to("#intro-logo", { scale: 1, duration: 1.2, ease: "elastic.out(1, 0.5)", delay: 0.2 });
-                        gsap.to("#intro-title", { scale: 1, duration: 1.2, ease: "elastic.out(1, 0.5)", delay: 0.4 });
-                        gsap.to("#intro-welcome", { opacity: 1, y: -20, duration: 1, ease: "power2.out", delay: 1 });
+                        // 3D Pop out animation for Logo, Title, and Welcome badge
+                        gsap.fromTo("#intro-logo", 
+                            { scale: 0, rotation: -15 }, 
+                            { scale: 1, rotation: 0, duration: 1.2, ease: "elastic.out(1, 0.5)", delay: 0.1 }
+                        );
+                        gsap.fromTo("#intro-title", 
+                            { scale: 0, y: 30 }, 
+                            { scale: 1, y: 0, duration: 1.2, ease: "elastic.out(1, 0.5)", delay: 0.3 }
+                        );
+                        gsap.fromTo("#intro-welcome", 
+                            { opacity: 0, y: 30 }, 
+                            { opacity: 1, y: 0, duration: 1, ease: "power2.out", delay: 0.8 }
+                        );
                         
                         // Wait, then fade out and go to dashboard
                         setTimeout(() => {
@@ -217,10 +237,13 @@ document.addEventListener("DOMContentLoaded", () => {
         
         activeTab = tabId;
 
+        // Ensure top header is visible when tab changes
+        revealTopHeader();
+
         // 1. Scroll user to the top immediately
         window.scrollTo({ top: 0, behavior: "instant" });
 
-        // 2. Update Header Title
+        // 2. Update Header Title (Desktop & Mobile)
         const titleMap = {
             intro: "Case Investigation: Mission Intro",
             dashboard: "Case Investigation: Dashboard",
@@ -228,9 +251,10 @@ document.addEventListener("DOMContentLoaded", () => {
             analytics: "Case Investigation: Analytics Reports",
             categories: "Case Investigation: Category Intel"
         };
-        if (pageTitle) {
-            pageTitle.textContent = titleMap[tabId] || "Case Investigation";
-        }
+        const newTitle = titleMap[tabId] || "Case Investigation";
+        if (pageTitle) pageTitle.textContent = newTitle;
+        const pageTitleMobile = document.getElementById("dynamic-page-title-mobile");
+        if (pageTitleMobile) pageTitleMobile.textContent = newTitle;
 
         // 3. Desktop Sidebar Active Class
         document.querySelectorAll(".nav-link").forEach(link => {

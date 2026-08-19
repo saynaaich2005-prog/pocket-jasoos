@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pocket Jasoos - Analytics</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Montserrat:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed": "#f8d8ff",
+                        "outline": "#9d8ba0",
+                        "primary-container": "#bd00ff",
+                        "surface-container-highest": "#353436",
+                        "error": "#ffb4ab",
+                        "on-surface-variant": "#d4c0d7",
+                        "surface-tint": "#ecb2ff",
+                        "on-primary-fixed": "#320047",
+                        "surface-container-high": "#2a2a2b",
+                        "primary-fixed-dim": "#ecb2ff",
+                        "on-primary-fixed-variant": "#74009f",
+                        "inverse-on-surface": "#313031",
+                        "surface-container-low": "#1c1b1c",
+                        "on-tertiary-fixed": "#370e00",
+                        "on-tertiary": "#5a1b00",
+                        "inverse-surface": "#e5e2e3",
+                        "error-container": "#93000a",
+                        "surface-bright": "#3a393a",
+                        "tertiary": "#ffb59a",
+                        "secondary-container": "#00eefc",
+                        "background": "#131314",
+                        "secondary-fixed-dim": "#00dbe9",
+                        "on-background": "#e5e2e3",
+                        "surface-container-lowest": "#0e0e0f",
+                        "on-primary": "#520071",
+                        "surface": "#131314",
+                        "on-surface": "#e5e2e3",
+                        "on-secondary-fixed-variant": "#004f54",
+                        "on-secondary-container": "#00686f",
+                        "tertiary-fixed": "#ffdbce",
+                        "surface-container": "#201f20",
+                        "tertiary-container": "#cf4900",
+                        "on-secondary": "#00363a",
+                        "inverse-primary": "#9900cf",
+                        "on-primary-container": "#ffffff",
+                        "on-tertiary-container": "#fffeff",
+                        "primary": "#ecb2ff",
+                        "surface-dim": "#131314",
+                        "tertiary-fixed-dim": "#ffb59a",
+                        "on-error": "#690005",
+                        "secondary-fixed": "#7df4ff",
+                        "on-tertiary-fixed-variant": "#802a00",
+                        "secondary": "#d3fbff",
+                        "on-secondary-fixed": "#002022",
+                        "surface-variant": "#353436",
+                        "on-error-container": "#ffdad6",
+                        "outline-variant": "#514255"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "margin-mobile": "16px",
+                        "max-width": "1200px",
+                        "unit": "8px",
+                        "margin-desktop": "48px"
+                    },
+                    "fontFamily": {
+                        "headline-xl": ["Montserrat"],
+                        "headline-sm": ["Montserrat"],
+                        "label-sm": ["Inter"],
+                        "headline-md": ["Montserrat"],
+                        "headline-lg-mobile": ["Montserrat"],
+                        "headline-lg": ["Montserrat"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-xl": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(24, 24, 27, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 50%;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.2) 0%, transparent 100%);
+        }
+        .glass-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 1px;
+            height: 50%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 100%);
+        }
+        
+        .radiant-glow {
+            box-shadow: 0 0 40px -10px theme('colors.primary');
+        }
+        
+        .chart-bar-glow {
+            filter: drop-shadow(0 0 8px theme('colors.secondary-container'));
+        }
+        
+        .doodle-underline {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 10' preserveAspectRatio='none'%3E%3Cpath d='M0,5 Q50,10 100,2 T100,8 Q50,0 0,5' fill='none' stroke='%23ecb2ff' stroke-width='2'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: bottom;
+            background-size: 100% 4px;
+            padding-bottom: 6px;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: theme('colors.background');
+        }
+        ::-webkit-scrollbar-thumb {
+            background: theme('colors.surface-variant');
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: theme('colors.outline');
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen selection:bg-primary-container selection:text-on-primary-container pb-[80px] md:pb-0">
+<!-- Desktop SideNavBar -->
+<nav class="fixed left-0 top-0 h-full z-40 hidden md:flex flex-col bg-surface-container-low backdrop-blur-xl border-r border-white/10 shadow-xl w-64">
+<div class="p-6 border-b border-white/5 flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-headline-sm overflow-hidden border border-white/20">
+<img alt="Detective User Profile" class="w-full h-full object-cover" data-alt="A stylized, flat-vector illustration of a mysterious detective character wearing a classic trench coat and fedora, rendered in a neon-noir color palette of deep purples and bright cyan against a dark background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnS3FWJWe9HxZGaj-YADJhn_qhlZ85yZB4GmGLSgDOJdw_-9R7bYbLtmXCvudYQmgLYHKtZNKW6ueO6QucFDD8jHS-BdnTYYtwk8BwU986moncaSwQMehCRYjntA75TP6DF1JhCSgZ_y4VBCOTmu_oDCFGtYFvr1cYpx0fpt8JKitgzV-X4w53gppUE8_sACBa1kKUhRYj6IIjTLVq7SEFPV2RyJNi01_Z2Jg-5n-pkBLEsfSJeX19ZQ"/>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">Pocket Jasoos</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Financial Investigator</p>
+</div>
+</div>
+<div class="flex-1 py-6 flex flex-col gap-2 overflow-y-auto">
+<a class="text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/50 rounded-lg mx-2 px-4 py-3 flex items-center gap-3 transition-all" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/50 rounded-lg mx-2 px-4 py-3 flex items-center gap-3 transition-all" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="font-label-md text-label-md">Expenses</span>
+</a>
+<a class="bg-primary-container text-on-primary-container rounded-lg font-bold mx-2 px-4 py-3 flex items-center gap-3" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">query_stats</span>
+<span class="font-label-md text-label-md">Analytics</span>
+</a>
+<a class="text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/50 rounded-lg mx-2 px-4 py-3 flex items-center gap-3 transition-all" href="#">
+<span class="material-symbols-outlined">category</span>
+<span class="font-label-md text-label-md">Categories</span>
+</a>
+<a class="text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/50 rounded-lg mx-2 px-4 py-3 flex items-center gap-3 transition-all" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</div>
+<div class="p-4 border-t border-white/5">
+<button class="w-full bg-gradient-to-r from-primary-container to-secondary-container text-on-primary-container font-label-md text-label-md py-3 rounded-lg shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">add</span>
+                Quick Add
+            </button>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="ml-0 md:ml-64 min-h-screen">
+<!-- TopAppBar -->
+<header class="sticky top-0 w-full z-30 flex justify-between items-center px-gutter py-4 bg-background/80 backdrop-blur-md border-b border-white/5">
+<div class="flex items-center gap-3 md:hidden">
+<h1 class="font-headline-md text-headline-md font-bold text-primary">Pocket Jasoos</h1>
+</div>
+<div class="hidden md:flex items-center gap-3 flex-1 max-w-md mx-auto relative group">
+<span class="material-symbols-outlined absolute left-3 text-on-surface-variant group-focus-within:text-secondary transition-colors">search</span>
+<input class="w-full bg-surface-container-high border border-white/10 rounded-full py-2 pl-10 pr-4 text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all font-body-md text-body-md" placeholder="Search investigations..." type="text"/>
+</div>
+<div class="flex items-center gap-2">
+<button class="text-on-surface-variant hover:bg-surface-variant/20 rounded-full p-2 transition-colors">
+<span class="material-symbols-outlined">calendar_month</span>
+</button>
+<button class="text-on-surface-variant hover:bg-surface-variant/20 rounded-full p-2 transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border border-background"></span>
+</button>
+</div>
+</header>
+<!-- Canvas -->
+<div class="p-margin-mobile md:p-margin-desktop max-w-max-width mx-auto space-y-8">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<h2 class="font-headline-xl text-headline-xl text-on-background mb-2">Investigation <span class="text-primary doodle-underline">Report</span></h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Uncovering the mysteries of your money, November 2023.</p>
+</div>
+<div class="flex gap-2">
+<button class="glass-card px-4 py-2 rounded-lg font-label-md text-label-md text-on-surface hover:bg-surface-variant/30 transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">filter_list</span> Filter
+                    </button>
+<button class="glass-card px-4 py-2 rounded-lg font-label-md text-label-md text-on-surface hover:bg-surface-variant/30 transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">download</span> Export
+                    </button>
+</div>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Performance Score Gauge -->
+<div class="glass-card rounded-2xl p-6 md:col-span-1 flex flex-col items-center justify-center text-center relative radiant-glow">
+<div class="absolute top-4 left-4 text-on-surface-variant">
+<span class="material-symbols-outlined">speed</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm mb-6 text-on-surface">Financial Health</h3>
+<div class="relative w-40 h-40 mb-4">
+<!-- SVG Gauge Mockup -->
+<svg class="w-full h-full overflow-visible" viewbox="0 0 100 50">
+<path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="rgba(255,255,255,0.1)" stroke-linecap="round" stroke-width="8"></path>
+<path class="chart-bar-glow" d="M 10 50 A 40 40 0 0 1 75 20" fill="none" stroke="theme('colors.secondary-container')" stroke-linecap="round" stroke-width="8"></path>
+</svg>
+<div class="absolute bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-center">
+<span class="font-headline-lg text-headline-lg text-secondary-container">78</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Score</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">Status: <span class="text-secondary font-medium">Stable</span></p>
+</div>
+<!-- Jasoos Insights -->
+<div class="glass-card rounded-2xl p-6 md:col-span-2 flex flex-col justify-between border border-primary/20 bg-gradient-to-br from-surface-container-high to-surface-container-low">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">psychology</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Jasoos Insights</h3>
+</div>
+<div class="space-y-4">
+<div class="p-4 rounded-xl bg-surface-container-highest/50 border border-white/5 flex gap-4 items-start">
+<span class="material-symbols-outlined text-error mt-1">warning</span>
+<div>
+<h4 class="font-label-md text-label-md font-bold mb-1 text-on-surface">Food Alert!</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">You spent 20% more on Food this week compared to last week. That's a lot of bubble tea.</p>
+</div>
+</div>
+<div class="p-4 rounded-xl bg-surface-container-highest/50 border border-white/5 flex gap-4 items-start">
+<span class="material-symbols-outlined text-secondary-container mt-1">trending_up</span>
+<div>
+<h4 class="font-label-md text-label-md font-bold mb-1 text-on-surface">Savings on Track</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Good job holding back on Games. You are 15% below your target limit for Entertainment.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Deep Dive Graphs (Bar Chart) -->
+<div class="glass-card rounded-2xl p-6 md:col-span-2 min-h-[300px] flex flex-col">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Monthly Spending Trend</h3>
+<select class="bg-surface-container-highest border-none text-label-md font-label-md text-on-surface-variant rounded-lg focus:ring-0 py-1 pl-3 pr-8 appearance-none cursor-pointer">
+<option>Last 6 Months</option>
+<option>This Year</option>
+</select>
+</div>
+<div class="flex-1 flex items-end gap-2 sm:gap-4 justify-between pt-10 relative">
+<!-- Chart Grid Lines -->
+<div class="absolute inset-0 flex flex-col justify-between pointer-events-none pb-8 z-0">
+<div class="border-b border-white/5 w-full h-0"></div>
+<div class="border-b border-white/5 w-full h-0"></div>
+<div class="border-b border-white/5 w-full h-0"></div>
+<div class="border-b border-white/5 w-full h-0"></div>
+</div>
+<!-- Bars -->
+<div class="relative z-10 w-full flex justify-between items-end h-[200px] group">
+<div class="flex flex-col items-center gap-2 w-full">
+<div class="w-full max-w-[40px] bg-surface-variant rounded-t-sm h-[40%] hover:bg-primary transition-colors cursor-pointer group-hover:opacity-50 hover:!opacity-100 relative"></div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Jun</span>
+</div>
+<div class="flex flex-col items-center gap-2 w-full">
+<div class="w-full max-w-[40px] bg-surface-variant rounded-t-sm h-[55%] hover:bg-primary transition-colors cursor-pointer group-hover:opacity-50 hover:!opacity-100"></div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Jul</span>
+</div>
+<div class="flex flex-col items-center gap-2 w-full">
+<div class="w-full max-w-[40px] bg-surface-variant rounded-t-sm h-[80%] hover:bg-primary transition-colors cursor-pointer group-hover:opacity-50 hover:!opacity-100"></div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Aug</span>
+</div>
+<div class="flex flex-col items-center gap-2 w-full">
+<div class="w-full max-w-[40px] bg-surface-variant rounded-t-sm h-[65%] hover:bg-primary transition-colors cursor-pointer group-hover:opacity-50 hover:!opacity-100"></div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Sep</span>
+</div>
+<div class="flex flex-col items-center gap-2 w-full">
+<div class="w-full max-w-[40px] bg-surface-variant rounded-t-sm h-[90%] hover:bg-primary transition-colors cursor-pointer group-hover:opacity-50 hover:!opacity-100"></div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Oct</span>
+</div>
+<div class="flex flex-col items-center gap-2 w-full relative">
+<!-- Tooltip for active bar -->
+<div class="absolute -top-12 bg-surface-container-highest text-on-surface font-label-sm text-label-sm py-1 px-3 rounded shadow-lg whitespace-nowrap opacity-0 transition-opacity">₹ 14,250</div>
+<div class="w-full max-w-[40px] bg-secondary-container rounded-t-sm h-[75%] hover:bg-secondary transition-colors cursor-pointer chart-bar-glow group-hover:opacity-50 hover:!opacity-100"></div>
+<span class="font-label-sm text-label-sm text-on-surface font-bold">Nov</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Category Heatmap / Radar -->
+<div class="glass-card rounded-2xl p-6 md:col-span-1 flex flex-col">
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-6">Category Radar</h3>
+<div class="flex-1 relative flex items-center justify-center min-h-[200px]">
+<!-- Simplified Radar Chart Mockup with CSS -->
+<div class="w-48 h-48 relative rounded-full border border-white/10 flex items-center justify-center">
+<div class="w-32 h-32 absolute rounded-full border border-white/10"></div>
+<div class="w-16 h-16 absolute rounded-full border border-white/10"></div>
+<!-- Spikes -->
+<div class="absolute w-full h-[1px] bg-white/10 rotate-0"></div>
+<div class="absolute w-full h-[1px] bg-white/10 rotate-45"></div>
+<div class="absolute w-full h-[1px] bg-white/10 rotate-90"></div>
+<div class="absolute w-full h-[1px] bg-white/10 rotate-[135deg]"></div>
+<!-- Data Polygon (Mockup) -->
+<svg class="absolute inset-0 w-full h-full" viewbox="0 0 100 100">
+<polygon class="chart-bar-glow" fill="rgba(189, 0, 255, 0.3)" points="50,15 80,40 70,85 30,75 15,35" stroke="theme('colors.primary')" stroke-width="2"></polygon>
+</svg>
+<!-- Labels -->
+<span class="absolute -top-4 font-label-sm text-label-sm text-on-surface-variant">Food</span>
+<span class="absolute -right-6 font-label-sm text-label-sm text-on-surface-variant">Shop</span>
+<span class="absolute -bottom-4 font-label-sm text-label-sm text-on-surface-variant">Bills</span>
+<span class="absolute -left-6 font-label-sm text-label-sm text-on-surface-variant">Fun</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Mobile BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-safe pt-3 md:hidden bg-surface-container-highest/90 backdrop-blur-2xl border-t border-white/10 shadow-[0_-10px_20px_rgba(0,0,0,0.4)] rounded-t-3xl h-[80px]">
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-60 active:bg-surface-variant/40 tap-highlight-transparent p-2 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1">home</span>
+<span class="font-label-sm text-label-sm">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-60 active:bg-surface-variant/40 tap-highlight-transparent p-2 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1">list_alt</span>
+<span class="font-label-sm text-label-sm">Activity</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary-fixed bg-secondary-container/20 rounded-xl px-4 py-1 tap-highlight-transparent transition-all" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1" style="font-variation-settings: 'FILL' 1;">insights</span>
+<span class="font-label-sm text-label-sm font-bold">Analysis</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-60 active:bg-surface-variant/40 tap-highlight-transparent p-2 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1">person</span>
+<span class="font-label-sm text-label-sm">Account</span>
+</a>
+</nav>
+<!-- Simple JS for Bar Chart Hover Effect Mockup -->
+<script>
+        document.querySelectorAll('.group .w-full.max-w-\\[40px\\]').forEach(bar => {
+            bar.addEventListener('mouseenter', (e) => {
+                const tooltip = e.target.previousElementSibling;
+                if(tooltip && tooltip.classList.contains('absolute')) {
+                    tooltip.style.opacity = '1';
+                }
+            });
+            bar.addEventListener('mouseleave', (e) => {
+                const tooltip = e.target.previousElementSibling;
+                if(tooltip && tooltip.classList.contains('absolute')) {
+                    tooltip.style.opacity = '0';
+                }
+            });
+        });
+    </script>
+</body></html>
