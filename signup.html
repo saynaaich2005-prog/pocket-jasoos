@@ -227,7 +227,7 @@
     </div>
 
     <!-- Scripts -->
-    <script src="auth.js"></script>
+    <script type="module" src="auth.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('signup-form');
@@ -243,13 +243,6 @@
             const submitBtn = document.getElementById('submit-btn');
             const btnText = document.getElementById('btn-text');
             const btnIcon = document.getElementById('btn-icon');
-
-            // If user is already logged in, redirect to index.html
-            const existingUser = PocketJasoosAuth.getCurrentUser();
-            if (existingUser) {
-                window.location.href = 'index.html';
-                return;
-            }
 
             // Toggle Password Visibility
             togglePassBtn.addEventListener('click', () => {

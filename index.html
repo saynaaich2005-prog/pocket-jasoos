@@ -96,11 +96,11 @@
     </script>
     <link rel="preload" as="image" href="logo.jpg">
     <link rel="stylesheet" href="style.css">
-    <!-- Auth gate: redirect before the app shell renders -->
-    <script src="auth.js"></script>
+    <!-- Auth & Session Service -->
+    <script type="module" src="auth.js"></script>
     <script>
-        if (!PocketJasoosAuth.getCurrentUser()) {
-            window.location.replace('login.html');
+        if (window.PocketJasoosAuth) {
+            window.PocketJasoosAuth.ensureUser();
         }
     </script>
 </head>
@@ -142,7 +142,7 @@
     <div class="flex min-h-screen overflow-hidden">
         
         <!-- Desktop Sidebar Navigation -->
-        <nav id="sidebar-nav" class="fixed left-0 top-0 h-full z-40 hidden md:flex flex-col bg-surface-container-low backdrop-blur-xl border-r border-white/10 shadow-xl w-64">
+        <nav id="sidebar-nav" class="fixed left-0 top-0 h-full z-40 hidden md:flex flex-col bg-surface-container-low backdrop-blur-xl border-r border-white/10 shadow-xl w-64 nav-visible">
             <!-- Sidebar Header User Profile -->
             <div class="p-6 border-b border-white/5 flex items-center gap-4">
                 <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-headline-sm overflow-hidden border border-white/20">
@@ -239,19 +239,71 @@
                 <main class="story-container">
                     <!-- Intro Cover Section -->
                     <section class="story-section min-h-screen flex flex-col items-center justify-center p-gutter" id="section-intro">
-                        <!-- Empty section for cinematic canvas playback -->
-                    </section>
-                    
-                    <!-- Radiant 3D Reveal Overlay -->
-                    <div id="radiant-intro" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#1a0b2e] opacity-0 pointer-events-none transition-opacity duration-1000 hidden">
-                        <!-- Radiant background glow -->
-                        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary-container/40 via-background to-background"></div>
-                        <div class="relative z-10 flex flex-col items-center">
-                            <img src="logo.jpg" alt="Pocket Jasoos Logo" class="w-40 h-40 rounded-full border-4 border-primary shadow-[0_0_50px_rgba(189,0,255,0.8)] mb-8 transform scale-0" id="intro-logo">
-                            <h1 class="text-6xl md:text-8xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-white to-primary drop-shadow-[0_10px_0_rgba(189,0,255,1)] transform scale-0 translate-x-8" id="intro-title" style="text-shadow: 0px 5px 0px #bd00ff, 0px 10px 0px #320047, 0px 15px 20px rgba(0,0,0,0.8);">POCKET JASOOS</h1>
-                            <p class="text-5xl md:text-7xl font-bold text-primary-fixed mt-12 drop-shadow-[0_0_20px_rgba(236,178,255,1)] opacity-0 tracking-wide" id="intro-welcome" style="font-family: 'Brush Script MT', cursive, serif;">Welcome User</p>
+                        <div class="content-wrapper centered">
+                            <span class="badge">CLASSIFIED FILES</span>
+                            <h1 class="main-title">POCKET JASOOS</h1>
+                            <p class="tagline">Follow the surveillance sequence below. Scroll to trace active financial patterns.</p>
+                            <div class="scroll-indicator">
+                                <div class="mouse">
+                                    <div class="wheel"></div>
+                                </div>
+                                <span>Scroll to Trace</span>
+                            </div>
                         </div>
-                    </div>
+                    </section>
+
+                    <!-- Story Step 1 -->
+                    <section class="story-section min-h-screen flex items-center p-gutter" id="section-trace">
+                        <div class="content-wrapper left-aligned">
+                            <div class="glass-card inner-glow p-8 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.7)] border border-white/10 backdrop-blur-2xl">
+                                <div class="flex justify-between items-center mb-4">
+                                    <span class="font-mono text-xs text-primary tracking-widest uppercase">INTEL // TIMELINE</span>
+                                    <h3 class="font-headline-sm text-lg font-bold text-on-surface">The Disappearance</h3>
+                                </div>
+                                <p class="text-on-surface-variant text-sm font-light leading-relaxed mb-6">A strange pattern is spotted in the records. Small, silent sums of currency vanishing at odd hours. We map the physical traces. Keep scrubbing to track the active footprints.</p>
+                                <div class="flex items-center gap-3 font-mono text-[11px] text-on-surface-variant border-t border-white/10 pt-4">
+                                    <div class="status-dot pulsing"></div>
+                                    <span>TRACING TRANSACTIONS...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Story Step 2 -->
+                    <section class="story-section min-h-screen flex items-center p-gutter" id="section-evidence">
+                        <div class="content-wrapper right-aligned">
+                            <div class="glass-card inner-glow p-8 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.7)] border border-white/10 backdrop-blur-2xl">
+                                <div class="flex justify-between items-center mb-4">
+                                    <span class="font-mono text-xs text-secondary tracking-widest uppercase">INTEL // FORENSICS</span>
+                                    <h3 class="font-headline-sm text-lg font-bold text-on-surface">Locating Suspects</h3>
+                                </div>
+                                <p class="text-on-surface-variant text-sm font-light leading-relaxed mb-6">Every spending anomaly leaves digital and spatial footprints. By compiling chronological evidence, we isolate the suspicious transactions across shopping, dining, and late-night charges.</p>
+                                <div class="flex items-center gap-3 font-mono text-[11px] text-on-surface-variant border-t border-white/10 pt-4">
+                                    <div class="status-dot warning pulsing"></div>
+                                    <span>COMPILING CATEGORY PROFILE...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Story Step 3: Resolution -->
+                    <section class="story-section min-h-screen flex items-center justify-center p-gutter" id="section-resolution">
+                        <div class="content-wrapper centered">
+                            <div class="glass-card inner-glow p-8 md:p-10 rounded-2xl max-w-[700px] mx-auto shadow-[0_30px_60px_rgba(0,0,0,0.8)] border border-primary/30 backdrop-blur-2xl text-center">
+                                <div class="w-16 h-16 rounded-full bg-primary-container/20 border border-primary/40 flex items-center justify-center mx-auto mb-4 text-primary">
+                                    <span class="material-symbols-outlined text-3xl">verified</span>
+                                </div>
+                                <h2 class="text-2xl md:text-3xl font-headline-md font-black text-primary mb-3">SURVEILLANCE COMPLETE</h2>
+                                <p class="text-on-surface-variant text-sm leading-relaxed mb-6">Chronological footprint analysis is plotted. Ready to inspect suspect categories, live balance, and financial intel?</p>
+                                <div class="flex justify-center gap-4">
+                                    <button class="bg-primary-container hover:bg-primary-fixed text-on-primary-container font-bold px-8 py-3.5 rounded-xl shadow-[0_0_25px_rgba(189,0,255,0.5)] transition-all transform hover:scale-105 cursor-pointer flex items-center gap-2" onclick="switchTab('dashboard')">
+                                        <span>Open Case Board</span>
+                                        <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
                 </main>
 
                 <!-- UI Hud elements (Intro Only) -->
@@ -349,12 +401,12 @@
                             <div class="flex justify-between items-center mb-6">
                                 <h3 class="font-headline-sm text-headline-sm text-on-surface">Spending Timeline</h3>
                                 <div class="flex gap-2">
-                                    <button class="px-3 py-1 rounded bg-surface-variant/50 text-xs text-on-surface font-medium border border-white/5">Week</button>
-                                    <button class="px-3 py-1 rounded bg-primary-container/20 text-xs text-primary font-medium border border-primary/20">Month</button>
+                                    <button id="timeline-btn-week" class="px-3 py-1 rounded bg-surface-variant/50 text-xs text-on-surface-variant hover:text-on-surface font-medium border border-white/5 transition-all cursor-pointer">Week</button>
+                                    <button id="timeline-btn-month" class="px-3 py-1 rounded bg-primary-container/20 text-xs text-primary font-medium border border-primary/20 transition-all cursor-pointer">Month</button>
                                 </div>
                             </div>
-                            <!-- Chart Graphic — 4 Suspects, colour-matched -->
-                            <div class="flex-1 flex flex-col">
+                            <!-- Chart Graphic Container -->
+                            <div class="flex-1 flex flex-col" id="dashboard-timeline-container">
                                 <!-- Grid + Bars -->
                                 <div class="relative flex items-end justify-around h-[170px] mb-2">
                                     <div class="absolute inset-0 flex flex-col justify-between border-l border-b border-white/10 pb-2 pl-2 pointer-events-none">
@@ -727,48 +779,101 @@
                             </div>
                         </div>
                         
-                        <!-- Spending trends charts -->
-                        <div class="glass-card rounded-xl p-6 md:col-span-2 min-h-[300px] flex flex-col">
-                            <div class="flex justify-between items-center mb-6">
-                                <h3 class="font-headline-sm text-headline-sm text-on-surface">Monthly Spending Trend</h3>
-                                <select class="bg-surface-container-highest border border-white/5 text-label-md font-label-md text-on-surface-variant rounded-lg focus:ring-0 py-1.5 pl-3 pr-8 appearance-none cursor-pointer">
-                                    <option>Last 6 Months</option>
-                                    <option>This Year</option>
-                                </select>
+                        <!-- Monthly Spending Realistic Graph Card -->
+                        <div class="glass-card rounded-xl p-6 md:col-span-2 min-h-[400px] flex flex-col justify-between relative overflow-hidden" id="monthly-spending-card">
+                            <!-- Card Header with Title, Badges & Controls -->
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 pb-4 border-b border-white/5">
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-7 h-7 rounded-lg bg-secondary-container/20 border border-secondary-container/30 flex items-center justify-center text-secondary">
+                                            <span class="material-symbols-outlined text-[18px]">query_stats</span>
+                                        </div>
+                                        <h3 class="font-headline-sm text-headline-sm text-on-surface">Monthly Spending Trend</h3>
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-secondary-container/15 text-secondary border border-secondary-container/30 animate-pulse">FORENSIC TELEMETRY</span>
+                                    </div>
+                                    <p class="text-xs text-on-surface-variant mt-1">Interactive month-over-month surveillance footprint analysis</p>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <!-- Graph Mode Switch: Spline Waveform vs Forensic Columns -->
+                                    <div class="flex bg-surface-variant/40 p-0.5 rounded-lg border border-white/10" id="graph-mode-toggle">
+                                        <button class="px-2.5 py-1 rounded-md text-xs font-medium bg-primary-container text-on-primary-container transition-all flex items-center gap-1 cursor-pointer" data-mode="spline" id="btn-mode-spline">
+                                            <span class="material-symbols-outlined text-[14px]">show_chart</span>
+                                            <span class="hidden sm:inline">Waveform</span>
+                                        </button>
+                                        <button class="px-2.5 py-1 rounded-md text-xs font-medium text-on-surface-variant hover:text-on-surface transition-all flex items-center gap-1 cursor-pointer" data-mode="bars" id="btn-mode-bars">
+                                            <span class="material-symbols-outlined text-[14px]">bar_chart</span>
+                                            <span class="hidden sm:inline">Columns</span>
+                                        </button>
+                                    </div>
+                                    <!-- Timeframe Select -->
+                                    <select id="monthly-timeframe-select" class="bg-surface-container-highest border border-white/10 text-xs font-label-sm text-on-surface rounded-lg focus:ring-1 focus:ring-primary py-1.5 pl-3 pr-8 appearance-none cursor-pointer">
+                                        <option value="6m">Last 6 Months</option>
+                                        <option value="12m">Full Year (12M)</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div class="flex-1 flex items-end gap-2 sm:gap-4 justify-between pt-10 relative h-[200px]">
-                                <div class="absolute inset-0 flex flex-col justify-between pointer-events-none pb-8 z-0">
-                                    <div class="border-b border-white/5 w-full h-0"></div>
-                                    <div class="border-b border-white/5 w-full h-0"></div>
-                                    <div class="border-b border-white/5 w-full h-0"></div>
-                                    <div class="border-b border-white/5 w-full h-0"></div>
+
+                            <!-- Financial Telemetry Quick KPI Row -->
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                                <div class="bg-surface-variant/20 border border-white/5 rounded-lg p-2.5">
+                                    <span class="block text-[10px] font-mono text-on-surface-variant uppercase tracking-wider">Total Tracked</span>
+                                    <span class="text-base font-bold font-headline-sm text-on-surface" id="stat-total-burn">₹72,640</span>
                                 </div>
-                                <div class="relative z-10 w-full flex justify-between items-end h-[160px] group">
-                                    <div class="flex flex-col items-center gap-2 w-full">
-                                        <div class="w-full max-w-[40px] bg-surface-variant rounded-t-sm h-[40%] hover:bg-primary transition-colors cursor-pointer group-hover:opacity-50 hover:!opacity-100"></div>
-                                        <span class="font-label-sm text-label-sm text-on-surface-variant">Jun</span>
+                                <div class="bg-surface-variant/20 border border-white/5 rounded-lg p-2.5">
+                                    <span class="block text-[10px] font-mono text-on-surface-variant uppercase tracking-wider">Monthly Avg</span>
+                                    <span class="text-base font-bold font-headline-sm text-secondary" id="stat-monthly-avg">₹12,106</span>
+                                </div>
+                                <div class="bg-surface-variant/20 border border-white/5 rounded-lg p-2.5">
+                                    <span class="block text-[10px] font-mono text-on-surface-variant uppercase tracking-wider">Peak Month</span>
+                                    <span class="text-base font-bold font-headline-sm text-error" id="stat-peak-month">Oct (₹15.6k)</span>
+                                </div>
+                                <div class="bg-surface-variant/20 border border-white/5 rounded-lg p-2.5">
+                                    <span class="block text-[10px] font-mono text-on-surface-variant uppercase tracking-wider">Budget Cap</span>
+                                    <span class="text-base font-bold font-headline-sm text-primary" id="stat-safe-budget">₹13,500/mo</span>
+                                </div>
+                            </div>
+
+                            <!-- Interactive Chart Canvas / SVG Container -->
+                            <div class="relative w-full h-[220px] flex-1 select-none" id="spending-graph-container">
+                                <!-- Dynamic SVG Graph Rendered by app.js -->
+                                <svg class="w-full h-full overflow-visible" id="spending-trend-svg" viewBox="0 0 680 200" preserveAspectRatio="none">
+                                    <!-- Populated dynamically by renderMonthlyGraph() -->
+                                </svg>
+                                
+                                <!-- Hover Forensic Detail Overlay Card -->
+                                <div id="graph-forensic-tooltip" class="absolute pointer-events-none hidden z-30 bg-[#121118]/95 border border-primary/40 rounded-xl p-3 shadow-[0_8px_30px_rgba(0,0,0,0.8)] backdrop-blur-xl transition-all duration-100 min-w-[200px]">
+                                    <div class="flex items-center justify-between gap-2 border-b border-white/10 pb-1.5 mb-1.5">
+                                        <span class="text-[11px] font-mono font-bold uppercase tracking-wider text-primary" id="tt-month-name">October 2023</span>
+                                        <span class="text-[10px] px-1.5 py-0.5 rounded font-mono font-bold" id="tt-status-badge">Over Limit</span>
                                     </div>
-                                    <div class="flex flex-col items-center gap-2 w-full">
-                                        <div class="w-full max-w-[40px] bg-surface-variant rounded-t-sm h-[55%] hover:bg-primary transition-colors cursor-pointer group-hover:opacity-50 hover:!opacity-100"></div>
-                                        <span class="font-label-sm text-label-sm text-on-surface-variant">Jul</span>
+                                    <div class="flex justify-between items-baseline mb-1">
+                                        <span class="text-[11px] text-on-surface-variant">Surveillance Spend:</span>
+                                        <span class="text-sm font-bold text-on-surface font-headline-sm" id="tt-amount">₹15,620</span>
                                     </div>
-                                    <div class="flex flex-col items-center gap-2 w-full">
-                                        <div class="w-full max-w-[40px] bg-surface-variant rounded-t-sm h-[80%] hover:bg-primary transition-colors cursor-pointer group-hover:opacity-50 hover:!opacity-100"></div>
-                                        <span class="font-label-sm text-label-sm text-on-surface-variant">Aug</span>
+                                    <div class="flex justify-between items-center text-[10px] text-on-surface-variant mb-1">
+                                        <span>Primary Suspect:</span>
+                                        <span class="text-secondary font-medium" id="tt-suspect">Shopping (41%)</span>
                                     </div>
-                                    <div class="flex flex-col items-center gap-2 w-full">
-                                        <div class="w-full max-w-[40px] bg-surface-variant rounded-t-sm h-[65%] hover:bg-primary transition-colors cursor-pointer group-hover:opacity-50 hover:!opacity-100"></div>
-                                        <span class="font-label-sm text-label-sm text-on-surface-variant">Sep</span>
-                                    </div>
-                                    <div class="flex flex-col items-center gap-2 w-full">
-                                        <div class="w-full max-w-[40px] bg-surface-variant rounded-t-sm h-[90%] hover:bg-primary transition-colors cursor-pointer group-hover:opacity-50 hover:!opacity-100"></div>
-                                        <span class="font-label-sm text-label-sm text-on-surface-variant">Oct</span>
-                                    </div>
-                                    <div class="flex flex-col items-center gap-2 w-full relative">
-                                        <div class="w-full max-w-[40px] bg-secondary-container rounded-t-sm h-[75%] hover:bg-secondary transition-colors cursor-pointer chart-bar-glow group-hover:opacity-50 hover:!opacity-100"></div>
-                                        <span class="font-label-sm text-label-sm text-on-surface font-bold">Nov</span>
+                                    <div class="flex justify-between items-center text-[10px] text-on-surface-variant">
+                                        <span>Trajectory:</span>
+                                        <span class="text-error font-medium" id="tt-burn-rate">+37.2% vs Sep</span>
                                     </div>
                                 </div>
+                            </div>
+
+                            <!-- Chart Legend & Indicator Footer -->
+                            <div class="flex flex-wrap items-center justify-between gap-2 mt-3 pt-3 border-t border-white/5 text-[11px] text-on-surface-variant font-label-sm">
+                                <div class="flex items-center gap-4">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="w-3 h-1 rounded-full bg-secondary shadow-[0_0_8px_rgba(0,238,252,0.8)]"></span>
+                                        <span>Spending Flow Waveform</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="w-3 h-0.5 border-t border-dashed border-error"></span>
+                                        <span class="text-error/80">Monthly Target Cap (₹13,500)</span>
+                                    </div>
+                                </div>
+                                <span class="text-on-surface-variant/60 font-mono text-[10px]">Hover or tap nodes for evidence details</span>
                             </div>
                         </div>
                         
@@ -1009,7 +1114,7 @@
         </div>
 
         <!-- Mobile Bottom Navigation Bar -->
-        <nav id="mobile-nav" class="bg-surface-container-highest/90 backdrop-blur-2xl border-t border-white/10 bg-surface-container-highest shadow-[0_-10px_20px_rgba(0,0,0,0.4)] fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 pb-safe pt-3 md:hidden">
+        <nav id="mobile-nav" class="bg-surface-container-highest/90 backdrop-blur-2xl border-t border-white/10 bg-surface-container-highest shadow-[0_-10px_20px_rgba(0,0,0,0.4)] fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 pb-safe pt-3 md:hidden nav-visible">
             <a class="mobile-nav-link flex flex-col items-center justify-center text-secondary-fixed bg-secondary-container/20 rounded-xl px-3 py-1.5 active:bg-surface-variant/40 tap-highlight-transparent font-label-sm text-label-sm w-16 cursor-pointer" data-tab="intro">
                 <span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">explore</span>
                 <span>Mission</span>
@@ -1040,16 +1145,10 @@
         <span class="tooltip-amount"></span>
     </div>
 
-    <!-- GSAP Libraries (only load for authenticated sessions) -->
+    <!-- GSAP Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-    <script>
-        if (PocketJasoosAuth.getCurrentUser()) {
-            PocketJasoosAuth.updateUI();
-            const appScript = document.createElement('script');
-            appScript.src = 'app.js';
-            document.body.appendChild(appScript);
-        }
-    </script>
+    <!-- Application Logic -->
+    <script type="module" src="app.js"></script>
 </body>
 </html>

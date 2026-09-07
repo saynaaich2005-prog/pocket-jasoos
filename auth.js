@@ -1,32 +1,81 @@
 /**
  * Pocket Jasoos Authentication System
  * Unified Client-Side & Backend Compatible Auth Service
+ * Features Safe Storage Fallback & Demo Investigator Auto-Seeding
  */
 
 const PocketJasoosAuth = (() => {
     const STORAGE_KEY_USER = 'pocket_jasoos_user';
     const STORAGE_KEY_USERS_DB = 'pocket_jasoos_all_users';
 
-    // Seed initial demo agent if none exists
+    // In-memory fallback for restricted environments (file://, sandboxed iframes, cookies disabled)
+    const memoryStore = {};
+
+    const safeStorage = {
+        getItem: (key) => {
+            try {
+                if (typeof window !== 'undefined' && window.localStorage) {
+                    return window.localStorage.getItem(key);
+                }
+            } catch (e) {
+                // Ignore and fall back to memory
+            }
+            return memoryStore[key] || null;
+        },
+        setItem: (key, val) => {
+            try {
+                if (typeof window !== 'undefined' && window.localStorage) {
+                    window.localStorage.setItem(key, val);
+                    return;
+                }
+            } catch (e) {
+                // Ignore and fall back to memory
+            }
+            memoryStore[key] = String(val);
+        },
+        removeItem: (key) => {
+            try {
+                if (typeof window !== 'undefined' && window.localStorage) {
+                    window.localStorage.removeItem(key);
+                }
+            } catch (e) {
+                // Ignore and fall back to memory
+            }
+            delete memoryStore[key];
+        }
+    };
+
+    // Default Demo Agent
+    const DEFAULT_AGENT = {
+        uid: 'agent-007',
+        name: 'Agent Jasoos',
+        email: 'agent@pocketjasoos.com',
+        password: 'detective123',
+        badgeId: 'PJ-7892',
+        role: 'Lead Financial Investigator',
+        createdAt: new Date().toISOString()
+    };
+
+    // Seed initial demo agent into DB
     const initStorage = () => {
         let users = [];
         try {
-            users = JSON.parse(localStorage.getItem(STORAGE_KEY_USERS_DB)) || [];
+            const raw = safeStorage.getItem(STORAGE_KEY_USERS_DB);
+            users = raw ? JSON.parse(raw) : [];
         } catch (e) {
             users = [];
         }
 
-        if (!users || users.length === 0) {
-            const defaultAgent = {
-                uid: 'agent-007',
-                name: 'Agent Jasoos',
-                email: 'agent@pocketjasoos.com',
-                password: 'detective123',
-                createdAt: new Date().toISOString(),
-                badgeId: 'PJ-7892'
-            };
-            users.push(defaultAgent);
-            localStorage.setItem(STORAGE_KEY_USERS_DB, JSON.stringify(users));
+        if (!Array.isArray(users) || users.length === 0) {
+            users = [DEFAULT_AGENT];
+            safeStorage.setItem(STORAGE_KEY_USERS_DB, JSON.stringify(users));
+        } else {
+            // Ensure demo agent exists in users list
+            const hasDemo = users.some(u => u.email.toLowerCase() === DEFAULT_AGENT.email.toLowerCase());
+            if (!hasDemo) {
+                users.push(DEFAULT_AGENT);
+                safeStorage.setItem(STORAGE_KEY_USERS_DB, JSON.stringify(users));
+            }
         }
     };
 
@@ -37,7 +86,7 @@ const PocketJasoosAuth = (() => {
      */
     const getCurrentUser = () => {
         try {
-            const userJson = localStorage.getItem(STORAGE_KEY_USER);
+            const userJson = safeStorage.getItem(STORAGE_KEY_USER);
             return userJson ? JSON.parse(userJson) : null;
         } catch (e) {
             return null;
@@ -45,18 +94,55 @@ const PocketJasoosAuth = (() => {
     };
 
     /**
+     * Ensures an active user exists (auto-assigns default demo agent if none is active)
+     */
+    const ensureUser = () => {
+        let user = getCurrentUser();
+        if (!user) {
+            user = {
+                uid: DEFAULT_AGENT.uid,
+                name: DEFAULT_AGENT.name,
+                email: DEFAULT_AGENT.email,
+                badgeId: DEFAULT_AGENT.badgeId,
+                role: DEFAULT_AGENT.role,
+                loggedInAt: new Date().toISOString()
+            };
+            safeStorage.setItem(STORAGE_KEY_USER, JSON.stringify(user));
+        }
+        return user;
+    };
+
+    /**
+     * Continue as a guest detective
+     */
+    const continueAsGuest = (guestName = 'Agent Jasoos') => {
+        const guestUser = {
+            uid: 'guest-' + Date.now(),
+            name: guestName,
+            email: 'guest@pocketjasoos.local',
+            badgeId: 'PJ-' + Math.floor(1000 + Math.random() * 9000),
+            role: 'Guest Investigator',
+            isGuest: true,
+            loggedInAt: new Date().toISOString()
+        };
+        safeStorage.setItem(STORAGE_KEY_USER, JSON.stringify(guestUser));
+        updateUI();
+        return guestUser;
+    };
+
+    /**
      * Validate email format
      */
     const validateEmail = (email) => {
         const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return re.test(String(email).toLowerCase());
+        return re.test(String(email || '').toLowerCase());
     };
 
     /**
      * Login user
      */
     const login = async (email, password) => {
-        const cleanEmail = email.trim().toLowerCase();
+        const cleanEmail = (email || '').trim().toLowerCase();
 
         if (!cleanEmail || !validateEmail(cleanEmail)) {
             return { success: false, message: 'Please enter a valid investigator email address.' };
@@ -66,8 +152,8 @@ const PocketJasoosAuth = (() => {
         }
 
         try {
-            const users = JSON.parse(localStorage.getItem(STORAGE_KEY_USERS_DB)) || [];
-            const user = users.find(u => u.email.toLowerCase() === cleanEmail);
+            const users = JSON.parse(safeStorage.getItem(STORAGE_KEY_USERS_DB) || '[]');
+            const user = users.find(u => (u.email || '').toLowerCase() === cleanEmail);
 
             if (!user) {
                 return { success: false, message: 'Agent credentials not found. Please register first.' };
@@ -83,10 +169,11 @@ const PocketJasoosAuth = (() => {
                 name: user.name || 'Agent Jasoos',
                 email: user.email,
                 badgeId: user.badgeId || 'PJ-' + Math.floor(1000 + Math.random() * 9000),
+                role: user.role || 'Field Agent',
                 loggedInAt: new Date().toISOString()
             };
 
-            localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(sessionUser));
+            safeStorage.setItem(STORAGE_KEY_USER, JSON.stringify(sessionUser));
             updateUI();
             return { success: true, user: sessionUser };
 
@@ -99,8 +186,8 @@ const PocketJasoosAuth = (() => {
      * Signup / Register new user
      */
     const signup = async (name, email, password) => {
-        const cleanName = name.trim();
-        const cleanEmail = email.trim().toLowerCase();
+        const cleanName = (name || '').trim();
+        const cleanEmail = (email || '').trim().toLowerCase();
 
         if (!cleanName) {
             return { success: false, message: 'Agent name is required.' };
@@ -113,8 +200,8 @@ const PocketJasoosAuth = (() => {
         }
 
         try {
-            const users = JSON.parse(localStorage.getItem(STORAGE_KEY_USERS_DB)) || [];
-            const existing = users.find(u => u.email.toLowerCase() === cleanEmail);
+            const users = JSON.parse(safeStorage.getItem(STORAGE_KEY_USERS_DB) || '[]');
+            const existing = users.find(u => (u.email || '').toLowerCase() === cleanEmail);
 
             if (existing) {
                 return { success: false, message: 'Agent with this email is already registered. Please login.' };
@@ -126,11 +213,12 @@ const PocketJasoosAuth = (() => {
                 email: cleanEmail,
                 password: password,
                 badgeId: 'PJ-' + Math.floor(1000 + Math.random() * 9000),
+                role: 'Field Agent',
                 createdAt: new Date().toISOString()
             };
 
             users.push(newUser);
-            localStorage.setItem(STORAGE_KEY_USERS_DB, JSON.stringify(users));
+            safeStorage.setItem(STORAGE_KEY_USERS_DB, JSON.stringify(users));
 
             // Auto-login newly registered user
             const sessionUser = {
@@ -138,10 +226,11 @@ const PocketJasoosAuth = (() => {
                 name: newUser.name,
                 email: newUser.email,
                 badgeId: newUser.badgeId,
+                role: newUser.role,
                 loggedInAt: new Date().toISOString()
             };
 
-            localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(sessionUser));
+            safeStorage.setItem(STORAGE_KEY_USER, JSON.stringify(sessionUser));
             updateUI();
             return { success: true, user: sessionUser };
 
@@ -154,7 +243,7 @@ const PocketJasoosAuth = (() => {
      * Logout currently logged-in user
      */
     const logout = () => {
-        localStorage.removeItem(STORAGE_KEY_USER);
+        safeStorage.removeItem(STORAGE_KEY_USER);
         updateUI();
         window.location.href = 'login.html';
     };
@@ -176,6 +265,7 @@ const PocketJasoosAuth = (() => {
      * Dynamically update UI across the application
      */
     const updateUI = () => {
+        if (typeof document === 'undefined') return;
         const user = getCurrentUser();
 
         // 1. Header user welcome text
@@ -204,13 +294,21 @@ const PocketJasoosAuth = (() => {
             }
         });
 
-        // 4. Radiant intro welcome message
+        // 4. Badge display
+        const badgeElements = document.querySelectorAll('.user-display-badge');
+        badgeElements.forEach(el => {
+            if (user && user.badgeId) {
+                el.textContent = user.badgeId;
+            }
+        });
+
+        // 5. Radiant intro welcome message
         const introWelcome = document.getElementById('intro-welcome');
         if (introWelcome) {
-            introWelcome.textContent = user ? `Welcome ${user.name}` : 'Welcome User';
+            introWelcome.textContent = user ? `Welcome ${user.name}` : 'Welcome Detective';
         }
 
-        // 5. Toggle visibility of Auth vs Guest controls
+        // 6. Toggle visibility of Auth vs Guest controls
         const authOnlyElements = document.querySelectorAll('.auth-only');
         const guestOnlyElements = document.querySelectorAll('.guest-only');
 
@@ -231,10 +329,18 @@ const PocketJasoosAuth = (() => {
         });
     };
 
-    document.addEventListener('DOMContentLoaded', updateUI);
+    if (typeof document !== 'undefined') {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', updateUI);
+        } else {
+            updateUI();
+        }
+    }
 
     return {
         getCurrentUser,
+        ensureUser,
+        continueAsGuest,
         validateEmail,
         login,
         signup,
@@ -245,4 +351,6 @@ const PocketJasoosAuth = (() => {
 })();
 
 // Export globally
-window.PocketJasoosAuth = PocketJasoosAuth;
+if (typeof window !== 'undefined') {
+    window.PocketJasoosAuth = PocketJasoosAuth;
+}

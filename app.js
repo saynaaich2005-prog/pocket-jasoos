@@ -38,6 +38,15 @@ const initApp = () => {
     
     const preloadImages = () => {
         return new Promise((resolve) => {
+            // Safety timeout: Ensure loader dismisses smoothly even on slow networks or restricted file protocols
+            const safetyTimer = setTimeout(() => {
+                if (!isPreloadDone) {
+                    progressBar.style.width = "100%";
+                    progressText.textContent = "100%";
+                    onPreloadComplete(resolve);
+                }
+            }, 3500);
+
             for (let i = 1; i <= frameCount; i++) {
                 const img = new Image();
                 img.onload = () => {
@@ -47,6 +56,7 @@ const initApp = () => {
                     progressText.textContent = `${progress}%`;
                     
                     if (loadedCount === frameCount) {
+                        clearTimeout(safetyTimer);
                         onPreloadComplete(resolve);
                     }
                 };
@@ -59,6 +69,7 @@ const initApp = () => {
                         // Both paths failed, count it anyway so loader doesn't hang
                         loadedCount++;
                         if (loadedCount === frameCount) {
+                            clearTimeout(safetyTimer);
                             onPreloadComplete(resolve);
                         }
                     }
@@ -70,6 +81,7 @@ const initApp = () => {
     };
 
     const onPreloadComplete = (resolve) => {
+        if (isPreloadDone) return;
         isPreloadDone = true;
         resizeCanvas();
         renderFrame(1);
@@ -78,17 +90,17 @@ const initApp = () => {
             loader.style.opacity = 0;
             loader.style.visibility = "hidden";
             
-            // Check authentication immediately after preloader finishes
-            if (window.PocketJasoosAuth && !window.PocketJasoosAuth.getCurrentUser()) {
-                window.location.href = 'login.html';
-                return;
+            // Ensure agent session is active
+            if (window.PocketJasoosAuth) {
+                window.PocketJasoosAuth.ensureUser();
+                window.PocketJasoosAuth.updateUI();
             }
             
-            // Initialize animations and navigation for authenticated users
+            // Initialize animations and navigation
             initGSAP();
             initNavigation();
-            resolve();
-        }, 600);
+            if (resolve) resolve();
+        }, 400);
     };
 
     // ----------------------------------------------------
@@ -156,48 +168,63 @@ const initApp = () => {
     let storyTriggers = [];
 
     const initGSAP = () => {
-        // Play animation automatically over 3.5 seconds
-        gsap.to(playhead, {
+        if (typeof gsap === "undefined" || typeof ScrollTrigger === "undefined") return;
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Frame scrub tween directly linked to scrolling down #panel-intro
+        scrollTween = gsap.to(playhead, {
             frame: frameCount,
             snap: "frame",
-            duration: 3.5,
             ease: "none",
-            onUpdate: () => {
-                renderFrame(Math.round(playhead.frame));
-                if (scrollProgressLine) {
-                    const progress = playhead.frame / frameCount;
-                    scrollProgressLine.style.width = `${progress * 100}%`;
-                }
-            },
-            onComplete: () => {
-                // Show radiant intro
-                const radiant = document.getElementById('radiant-intro');
-                if (radiant) {
-                    radiant.classList.remove('hidden');
-                    // Allow CSS display to apply before opacity transition
-                    setTimeout(() => {
-                        radiant.classList.remove('opacity-0', 'pointer-events-none');
-                        
-                        // 3D Pop out animation
-                        gsap.to("#intro-logo", { scale: 1, duration: 1.2, ease: "elastic.out(1, 0.5)", delay: 0.2 });
-                        gsap.to("#intro-title", { scale: 1, duration: 1.2, ease: "elastic.out(1, 0.5)", delay: 0.4 });
-                        gsap.to("#intro-welcome", { opacity: 1, y: -20, duration: 1, ease: "power2.out", delay: 1 });
-                        
-                        // Wait, then fade out and go to dashboard
-                        setTimeout(() => {
-                            radiant.classList.add('opacity-0', 'pointer-events-none');
-                            setTimeout(() => {
-                                radiant.classList.add('hidden');
-                                if (typeof switchTab === 'function') {
-                                    switchTab('dashboard');
-                                }
-                            }, 1000);
-                        }, 3500);
-                    }, 50);
-                } else {
-                    if (typeof switchTab === 'function') switchTab('dashboard');
+            scrollTrigger: {
+                trigger: "#panel-intro",
+                start: "top top",
+                end: "bottom bottom",
+                scrub: 0.5,
+                onUpdate: (self) => {
+                    renderFrame(Math.round(playhead.frame));
+                    if (scrollProgressLine) {
+                        scrollProgressLine.style.width = `${self.progress * 100}%`;
+                    }
                 }
             }
+        });
+
+        // Story Cards fade in and out as user scrolls through the chapters
+        const sections = document.querySelectorAll(".story-section");
+        sections.forEach((section) => {
+            const wrapper = section.querySelector(".content-wrapper");
+            if (!wrapper) return;
+            
+            // Fade In ScrollTrigger
+            const inTrigger = ScrollTrigger.create({
+                trigger: section,
+                start: "top 80%",
+                end: "top 35%",
+                scrub: true,
+                onUpdate: (self) => {
+                    gsap.set(wrapper, {
+                        opacity: self.progress,
+                        y: 50 - (self.progress * 50)
+                    });
+                }
+            });
+            storyTriggers.push(inTrigger);
+
+            // Fade Out ScrollTrigger
+            const outTrigger = ScrollTrigger.create({
+                trigger: section,
+                start: "bottom 65%",
+                end: "bottom 20%",
+                scrub: true,
+                onUpdate: (self) => {
+                    gsap.set(wrapper, {
+                        opacity: 1 - self.progress,
+                        y: -self.progress * 50
+                    });
+                }
+            });
+            storyTriggers.push(outTrigger);
         });
     };
 
@@ -276,6 +303,9 @@ const initApp = () => {
                             { scale: 0, opacity: 0, transformOrigin: "50% 50%" },
                             { scale: 1, opacity: 1, duration: 1, stagger: 0.15, ease: "elastic.out(1, 0.7)", delay: 0.2 }
                         );
+                        if (typeof initMonthlySpendingGraph === 'function') {
+                            initMonthlySpendingGraph();
+                        }
                     }
                 }, 50);
             } else {
@@ -434,14 +464,393 @@ const initApp = () => {
     };
 
     // ----------------------------------------------------
-    // 8. Start Preloader and Initialize Auth UI
+    // 8. Realistic Monthly Spending Graph
+    // ----------------------------------------------------
+    const initMonthlySpendingGraph = () => {
+        const svg = document.getElementById("spending-trend-svg");
+        if (!svg) return;
+
+        const tooltip = document.getElementById("graph-forensic-tooltip");
+        const ttMonth = document.getElementById("tt-month-name");
+        const ttStatus = document.getElementById("tt-status-badge");
+        const ttAmount = document.getElementById("tt-amount");
+        const ttSuspect = document.getElementById("tt-suspect");
+        const ttBurnRate = document.getElementById("tt-burn-rate");
+
+        const statTotal = document.getElementById("stat-total-burn");
+        const statAvg = document.getElementById("stat-monthly-avg");
+        const statPeak = document.getElementById("stat-peak-month");
+
+        const timeframeSelect = document.getElementById("monthly-timeframe-select");
+        const btnSpline = document.getElementById("btn-mode-spline");
+        const btnBars = document.getElementById("btn-mode-bars");
+
+        let currentMode = "spline";
+        let currentTimeframe = "6m";
+
+        const dataSets = {
+            "6m": [
+                { label: "Jun", month: "June 2023", amount: 8420, suspect: "Shopping (₹2.8k)", status: "Under Budget", isOver: false, change: "-8.4% vs May" },
+                { label: "Jul", month: "July 2023", amount: 10150, suspect: "Food (₹3.1k)", status: "Normal", isOver: false, change: "+20.5% vs Jun" },
+                { label: "Aug", month: "August 2023", amount: 14200, suspect: "Shopping (₹5.2k)", status: "Over Limit", isOver: true, change: "+39.9% vs Jul" },
+                { label: "Sep", month: "September 2023", amount: 11380, suspect: "Food (₹3.5k)", status: "Under Budget", isOver: false, change: "-19.8% vs Aug" },
+                { label: "Oct", month: "October 2023", amount: 15620, suspect: "Electronics (₹6.4k)", status: "Critical Peak", isOver: true, change: "+37.2% vs Sep" },
+                { label: "Nov", month: "November 2023", amount: 11480, suspect: "Shopping (₹3.6k)", status: "Active Case", isOver: false, change: "-26.5% vs Oct" }
+            ],
+            "12m": [
+                { label: "Jan", month: "January 2023", amount: 9200, suspect: "Bills (₹3.2k)", status: "Normal", isOver: false, change: "-12.0%" },
+                { label: "Feb", month: "February 2023", amount: 8750, suspect: "Food (₹2.8k)", status: "Lowest", isOver: false, change: "-4.8%" },
+                { label: "Mar", month: "March 2023", amount: 11400, suspect: "Shopping (₹3.6k)", status: "Normal", isOver: false, change: "+30.2%" },
+                { label: "Apr", month: "April 2023", amount: 10800, suspect: "Food (₹3.2k)", status: "Normal", isOver: false, change: "-5.2%" },
+                { label: "May", month: "May 2023", amount: 12950, suspect: "Travel (₹4.5k)", status: "Normal", isOver: false, change: "+19.9%" },
+                { label: "Jun", month: "June 2023", amount: 8420, suspect: "Shopping (₹2.8k)", status: "Under Budget", isOver: false, change: "-34.9%" },
+                { label: "Jul", month: "July 2023", amount: 10150, suspect: "Food (₹3.1k)", status: "Normal", isOver: false, change: "+20.5%" },
+                { label: "Aug", month: "August 2023", amount: 14200, suspect: "Shopping (₹5.2k)", status: "Over Limit", isOver: true, change: "+39.9%" },
+                { label: "Sep", month: "September 2023", amount: 11380, suspect: "Food (₹3.5k)", status: "Under Budget", isOver: false, change: "-19.8%" },
+                { label: "Oct", month: "October 2023", amount: 15620, suspect: "Festivities (₹6.4k)", status: "Critical Peak", isOver: true, change: "+37.2%" },
+                { label: "Nov", month: "November 2023", amount: 11480, suspect: "Shopping (₹3.6k)", status: "Active Case", isOver: false, change: "-26.5%" },
+                { label: "Dec", month: "December 2023", amount: 13900, suspect: "Gifts (₹4.8k)", status: "Projected", isOver: true, change: "+21.0%" }
+            ]
+        };
+
+        const BUDGET_LIMIT = 13500;
+        const MAX_VAL = 20000;
+        const CHART_WIDTH = 680;
+        const CHART_HEIGHT = 180;
+        const PADDING_TOP = 25;
+        const PADDING_BOTTOM = 30;
+        const PADDING_LEFT = 55;
+        const PADDING_RIGHT = 30;
+
+        const renderChart = () => {
+            const data = dataSets[currentTimeframe] || dataSets["6m"];
+            const count = data.length;
+
+            const total = data.reduce((acc, d) => acc + d.amount, 0);
+            const avg = Math.round(total / count);
+            const peak = data.reduce((max, d) => d.amount > max.amount ? d : max, data[0]);
+
+            if (statTotal) statTotal.textContent = `₹${total.toLocaleString('en-IN')}`;
+            if (statAvg) statAvg.textContent = `₹${avg.toLocaleString('en-IN')}`;
+            if (statPeak) statPeak.textContent = `${peak.label} (₹${(peak.amount / 1000).toFixed(1)}k)`;
+
+            const innerWidth = CHART_WIDTH - PADDING_LEFT - PADDING_RIGHT;
+            const innerHeight = CHART_HEIGHT - PADDING_TOP - PADDING_BOTTOM;
+
+            const getY = (val) => {
+                const clamped = Math.max(0, Math.min(MAX_VAL, val));
+                return PADDING_TOP + innerHeight - (clamped / MAX_VAL) * innerHeight;
+            };
+
+            const getX = (index) => {
+                if (count <= 1) return PADDING_LEFT + innerWidth / 2;
+                return PADDING_LEFT + (index / (count - 1)) * innerWidth;
+            };
+
+            const budgetY = getY(BUDGET_LIMIT);
+
+            let svgContent = `
+                <defs>
+                    <linearGradient id="splineAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#00eefc" stop-opacity="0.38" />
+                        <stop offset="60%" stop-color="#bd00ff" stop-opacity="0.12" />
+                        <stop offset="100%" stop-color="#131314" stop-opacity="0" />
+                    </linearGradient>
+                    <linearGradient id="splineStrokeGrad" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stop-color="#00eefc" />
+                        <stop offset="50%" stop-color="#ecb2ff" />
+                        <stop offset="100%" stop-color="#00eefc" />
+                    </linearGradient>
+                    <linearGradient id="barColumnGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#00eefc" stop-opacity="0.95" />
+                        <stop offset="100%" stop-color="#bd00ff" stop-opacity="0.4" />
+                    </linearGradient>
+                    <linearGradient id="barOverGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#ffb4ab" stop-opacity="0.95" />
+                        <stop offset="100%" stop-color="#cf4900" stop-opacity="0.4" />
+                    </linearGradient>
+                    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feGaussianBlur stdDeviation="4" result="blur" />
+                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                    </filter>
+                </defs>
+
+                <!-- Background Grid & Y-Axis Reference Lines -->
+                <g class="chart-grid" opacity="0.3">
+            `;
+
+            const gridSteps = [0, 5000, 10000, 15000, 20000];
+            gridSteps.forEach(step => {
+                const y = getY(step);
+                const label = step === 0 ? "₹0" : `₹${step / 1000}k`;
+                svgContent += `
+                    <line x1="${PADDING_LEFT - 10}" y1="${y}" x2="${CHART_WIDTH - PADDING_RIGHT}" y2="${y}" stroke="rgba(255,255,255,0.15)" stroke-dasharray="3 4" stroke-width="1" />
+                    <text x="${PADDING_LEFT - 14}" y="${y + 4}" fill="#d4c0d7" font-size="10" font-family="'Space Grotesk', monospace" text-anchor="end">${label}</text>
+                `;
+            });
+
+            svgContent += `
+                </g>
+                <!-- Target Budget Threshold -->
+                <g class="budget-threshold-line">
+                    <line x1="${PADDING_LEFT}" y1="${budgetY}" x2="${CHART_WIDTH - PADDING_RIGHT}" y2="${budgetY}" stroke="#ffb4ab" stroke-dasharray="4 4" stroke-width="1.5" opacity="0.75" />
+                    <text x="${CHART_WIDTH - PADDING_RIGHT}" y="${budgetY - 6}" fill="#ffb4ab" font-size="9" font-family="'Space Grotesk', monospace" text-anchor="end" font-weight="bold">TARGET LIMIT: ₹13.5k</text>
+                </g>
+            `;
+
+            const points = data.map((d, i) => ({
+                x: getX(i),
+                y: getY(d.amount),
+                data: d,
+                index: i
+            }));
+
+            if (currentMode === "spline") {
+                let pathD = `M ${points[0].x} ${points[0].y}`;
+                for (let i = 0; i < points.length - 1; i++) {
+                    const p0 = points[i];
+                    const p1 = points[i + 1];
+                    const cp1x = p0.x + (p1.x - p0.x) * 0.45;
+                    const cp1y = p0.y;
+                    const cp2x = p0.x + (p1.x - p0.x) * 0.55;
+                    const cp2y = p1.y;
+                    pathD += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p1.x} ${p1.y}`;
+                }
+
+                const lastPoint = points[points.length - 1];
+                const bottomY = PADDING_TOP + innerHeight;
+                const areaD = `${pathD} L ${lastPoint.x} ${bottomY} L ${points[0].x} ${bottomY} Z`;
+
+                svgContent += `
+                    <!-- Gradient Area Fill -->
+                    <path d="${areaD}" fill="url(#splineAreaGrad)" class="graph-area-path" />
+
+                    <!-- Glowing Spline Waveform -->
+                    <path d="${pathD}" fill="none" stroke="url(#splineStrokeGrad)" stroke-width="3.5" filter="url(#neonGlow)" class="graph-spline-path" stroke-linecap="round" stroke-linejoin="round" />
+                `;
+            } else {
+                const barWidth = Math.min(36, (innerWidth / count) * 0.55);
+                points.forEach(p => {
+                    const barHeight = (PADDING_TOP + innerHeight) - p.y;
+                    const grad = p.data.isOver ? "url(#barOverGrad)" : "url(#barColumnGrad)";
+                    const strokeCol = p.data.isOver ? "#ffb4ab" : "#00eefc";
+                    svgContent += `
+                        <rect x="${p.x - barWidth / 2}" y="${p.y}" width="${barWidth}" height="${barHeight}" rx="4" fill="${grad}" stroke="${strokeCol}" stroke-width="1.5" class="graph-column-bar" data-index="${p.index}" />
+                    `;
+                });
+            }
+
+            svgContent += `
+                <!-- Laser Guide -->
+                <line id="graph-cursor-guide" x1="0" y1="${PADDING_TOP}" x2="0" y2="${PADDING_TOP + innerHeight}" stroke="#00eefc" stroke-width="1.5" stroke-dasharray="2 3" opacity="0" pointer-events="none" />
+            `;
+
+            points.forEach((p) => {
+                const strokeColor = p.data.isOver ? "#ffb4ab" : "#00eefc";
+                const fillColor = p.data.isOver ? "#cf4900" : "#00363a";
+
+                svgContent += `
+                    <g class="graph-node-group" data-index="${p.index}" style="cursor:pointer;">
+                        ${p.data.isOver ? `<circle cx="${p.x}" cy="${p.y}" r="12" fill="none" stroke="#ffb4ab" stroke-width="1.5" class="node-pulse-ring" opacity="0.6" />` : ""}
+                        <circle cx="${p.x}" cy="${p.y}" r="5.5" fill="${fillColor}" stroke="${strokeColor}" stroke-width="2.5" class="graph-node" />
+                        <circle cx="${p.x}" cy="${p.y}" r="22" fill="transparent" class="graph-hit-area" data-index="${p.index}" />
+                        <text x="${p.x}" y="${PADDING_TOP + innerHeight + 20}" fill="${p.data.isOver ? '#ffb4ab' : '#e5e2e3'}" font-size="11" font-family="'Space Grotesk', monospace" text-anchor="middle" font-weight="${p.data.isOver ? 'bold' : 'normal'}">${p.data.label}</text>
+                    </g>
+                `;
+            });
+
+            svg.innerHTML = svgContent;
+            setupGraphInteractions(points);
+        };
+
+        const setupGraphInteractions = (points) => {
+            const container = document.getElementById("spending-graph-container");
+            const guide = document.getElementById("graph-cursor-guide");
+
+            const showDetail = (p) => {
+                if (!tooltip || !container) return;
+
+                document.querySelectorAll(".graph-node").forEach((node, idx) => {
+                    if (idx === p.index) {
+                        node.classList.add("active-node");
+                    } else {
+                        node.classList.remove("active-node");
+                    }
+                });
+
+                if (guide) {
+                    guide.setAttribute("x1", p.x);
+                    guide.setAttribute("x2", p.x);
+                    guide.setAttribute("opacity", "0.85");
+                }
+
+                if (ttMonth) ttMonth.textContent = p.data.month;
+                if (ttAmount) ttAmount.textContent = `₹${p.data.amount.toLocaleString('en-IN')}`;
+                if (ttSuspect) ttSuspect.textContent = p.data.suspect;
+                if (ttBurnRate) {
+                    ttBurnRate.textContent = p.data.change;
+                    ttBurnRate.className = p.data.change.startsWith("+") ? "text-error font-medium" : "text-green-400 font-medium";
+                }
+                if (ttStatus) {
+                    ttStatus.textContent = p.data.status;
+                    ttStatus.className = p.data.isOver
+                        ? "text-[10px] px-1.5 py-0.5 rounded font-mono font-bold bg-error/20 text-error border border-error/30"
+                        : "text-[10px] px-1.5 py-0.5 rounded font-mono font-bold bg-secondary/20 text-secondary border border-secondary/30";
+                }
+
+                tooltip.classList.remove("hidden");
+                const rect = container.getBoundingClientRect();
+                let left = (p.x / CHART_WIDTH) * rect.width - tooltip.offsetWidth / 2;
+                let top = (p.y / CHART_HEIGHT) * rect.height - tooltip.offsetHeight - 15;
+
+                if (left < 10) left = 10;
+                if (left + tooltip.offsetWidth > rect.width - 10) left = rect.width - tooltip.offsetWidth - 10;
+                if (top < 5) top = (p.y / CHART_HEIGHT) * rect.height + 25;
+
+                tooltip.style.left = `${left}px`;
+                tooltip.style.top = `${top}px`;
+            };
+
+            const hideDetail = () => {
+                if (tooltip) tooltip.classList.add("hidden");
+                if (guide) guide.setAttribute("opacity", "0");
+                document.querySelectorAll(".graph-node").forEach(node => node.classList.remove("active-node"));
+            };
+
+            document.querySelectorAll(".graph-node-group, .graph-column-bar").forEach(el => {
+                const idx = parseInt(el.getAttribute("data-index"), 10);
+                const p = points[idx];
+                if (!p) return;
+
+                el.addEventListener("mouseenter", () => showDetail(p));
+                el.addEventListener("touchstart", (e) => {
+                    e.preventDefault();
+                    showDetail(p);
+                }, { passive: false });
+            });
+
+            if (container) {
+                container.addEventListener("mouseleave", hideDetail);
+            }
+        };
+
+        if (btnSpline && btnBars) {
+            btnSpline.onclick = () => {
+                currentMode = "spline";
+                btnSpline.classList.add("bg-primary-container", "text-on-primary-container");
+                btnSpline.classList.remove("text-on-surface-variant");
+                btnBars.classList.remove("bg-primary-container", "text-on-primary-container");
+                btnBars.classList.add("text-on-surface-variant");
+                renderChart();
+            };
+
+            btnBars.onclick = () => {
+                currentMode = "bars";
+                btnBars.classList.add("bg-primary-container", "text-on-primary-container");
+                btnBars.classList.remove("text-on-surface-variant");
+                btnSpline.classList.remove("bg-primary-container", "text-on-primary-container");
+                btnSpline.classList.add("text-on-surface-variant");
+                renderChart();
+            };
+        }
+
+        if (timeframeSelect) {
+            timeframeSelect.onchange = (e) => {
+                currentTimeframe = e.target.value;
+                renderChart();
+            };
+        }
+
+        renderChart();
+    };
+
+    // ----------------------------------------------------
+    // 9. Dashboard Spending Timeline Toggle (Week / Month)
+    // ----------------------------------------------------
+    const initDashboardTimelineToggle = () => {
+        const btnWeek = document.getElementById("timeline-btn-week");
+        const btnMonth = document.getElementById("timeline-btn-month");
+        const container = document.getElementById("dashboard-timeline-container");
+        if (!btnWeek || !btnMonth || !container) return;
+
+        const weekData = [
+            { label: "Mon", amount: "₹420", height: 35, category: "Food", color: "#fbbc05" },
+            { label: "Tue", amount: "₹850", height: 60, category: "Shopping", color: "#ffb59a" },
+            { label: "Wed", amount: "₹1,200", height: 85, category: "Movies", color: "#ecb2ff" },
+            { label: "Thu", amount: "₹340", height: 28, category: "Food", color: "#fbbc05" },
+            { label: "Fri", amount: "₹1,850", height: 125, category: "Games", color: "#34a853" },
+            { label: "Sat", amount: "₹2,640", height: 160, category: "Shopping", color: "#ffb59a" },
+            { label: "Sun", amount: "₹1,120", height: 78, category: "Food", color: "#fbbc05" }
+        ];
+
+        const monthData = [
+            { label: "Shopping", amount: "₹3,620", height: 140, category: "Shopping", color: "#ffb59a" },
+            { label: "Food", amount: "₹2,840", height: 110, category: "Food", color: "#fbbc05" },
+            { label: "Movies", amount: "₹1,250", height: 49, category: "Movies", color: "#ecb2ff" },
+            { label: "Games", amount: "₹1,150", height: 45, category: "Games", color: "#34a853" }
+        ];
+
+        const renderBars = (items, isWeek = false) => {
+            let barsHtml = `
+                <div class="relative flex items-end justify-around h-[170px] mb-2">
+                    <div class="absolute inset-0 flex flex-col justify-between border-l border-b border-white/10 pb-2 pl-2 pointer-events-none">
+                        <div class="w-full h-[1px] bg-white/5"></div>
+                        <div class="w-full h-[1px] bg-white/5"></div>
+                        <div class="w-full h-[1px] bg-white/5"></div>
+                        <div class="w-full h-[1px] bg-white/5"></div>
+                    </div>
+            `;
+
+            const barWidth = isWeek ? "11%" : "20%";
+
+            items.forEach(item => {
+                barsHtml += `
+                    <div class="bar-group flex flex-col gap-0.5 z-10" style="width:${barWidth};" data-category="${item.category}" data-amount="${item.amount}">
+                        <div class="w-full rounded-t-sm" style="height:4px;background:${item.color}40;"></div>
+                        <div class="bar-fill w-full rounded-b-sm" style="height:${item.height}px;background:${item.color}e0;box-shadow:0 0 14px ${item.color}66;--bar-glow:${item.color}99;"></div>
+                    </div>
+                `;
+            });
+
+            barsHtml += `</div><div class="flex justify-around">`;
+
+            items.forEach(item => {
+                barsHtml += `
+                    <span class="text-[10px] font-semibold text-center tracking-wide" style="width:${barWidth};color:${item.color}e0;">${item.label}</span>
+                `;
+            });
+
+            barsHtml += `</div>`;
+            container.innerHTML = barsHtml;
+
+            initChartTooltips();
+        };
+
+        btnWeek.onclick = () => {
+            btnWeek.className = "px-3 py-1 rounded bg-primary-container/20 text-xs text-primary font-medium border border-primary/20 transition-all cursor-pointer";
+            btnMonth.className = "px-3 py-1 rounded bg-surface-variant/50 text-xs text-on-surface-variant hover:text-on-surface font-medium border border-white/5 transition-all cursor-pointer";
+            renderBars(weekData, true);
+        };
+
+        btnMonth.onclick = () => {
+            btnMonth.className = "px-3 py-1 rounded bg-primary-container/20 text-xs text-primary font-medium border border-primary/20 transition-all cursor-pointer";
+            btnWeek.className = "px-3 py-1 rounded bg-surface-variant/50 text-xs text-on-surface-variant hover:text-on-surface font-medium border border-white/5 transition-all cursor-pointer";
+            renderBars(monthData, false);
+        };
+    };
+
+    // ----------------------------------------------------
+    // 10. Start Preloader and Initialize Auth UI
     // ----------------------------------------------------
     if (window.PocketJasoosAuth) {
+        window.PocketJasoosAuth.ensureUser();
         window.PocketJasoosAuth.updateUI();
     }
     initProfileMenu();
     preloadImages();
     initChartTooltips();
+    initMonthlySpendingGraph();
+    initDashboardTimelineToggle();
 };
 
 if (document.readyState === "loading") {
